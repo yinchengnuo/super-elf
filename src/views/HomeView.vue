@@ -1,9 +1,103 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import logo from '@/assets/logo.png'
+import make from '@/components/make.vue'
+import list from '@/components/list.vue'
+import example from '@/components/example.vue'
+import { ref, onMounted, reactive } from 'vue'
+
+import { MinusOutlined, CloseOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue'
+
+const refPage = ref()
+
+const state = reactive({
+  status: 0
+})
+
+const IPC = require('electron').ipcRenderer
+
+const getWindowStatus = () => {
+  const code = Date.now()
+  IPC.once(code, (_, is) => {
+    if (is) {
+      state.status = 1
+    }
+    IPC.once(code, (_, is) => {
+      if (is) {
+        state.status = -1
+      }
+    })
+    IPC.invoke('EVAL', `window.webContents.send('${code}', window.isMinimized())`).catch(() => { })
+  })
+  IPC.invoke('EVAL', `window.webContents.send('${code}', window.isMaximized())`).catch(() => { })
+}
+getWindowStatus()
+
+document.onvisibilitychange = getWindowStatus
+
+const mini = () => {
+  state.status = -1
+  IPC.invoke('EVAL', `window.minimize()`)
+}
+
+const full = () => {
+  IPC.invoke('EVAL', `window.${state.status ? 'unmaximize' : 'maximize'}()`).catch(() => { })
+  state.status = state.status ? 0 : 1
+}
+
+const close = () => {
+  IPC.invoke('EVAL', `app.quit()`).catch(() => { })
+}
+
+onMounted(() => {
+  refPage.value.$el.onmousedown = ({ screenX, screenY }) => {
+    if (state.status !== 0) return
+    const code = Date.now()
+    IPC.once(code, (_, [left, top]) => {
+      const x = screenX - left
+      const y = screenY - top
+      document.onmousemove = ({ screenX, screenY }) => {
+        IPC.invoke('EVAL', `window.setPosition(${screenX - x}, ${screenY - y})`).catch(() => { })
+      }
+      document.onmouseup = () => {
+        document.onmouseup = null
+        document.onmousemove = null
+      }
+    })
+    IPC.invoke('EVAL', `window.webContents.send('${code}', window.getPosition())`).catch(() => { })
+  }
+})
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <a-page-header ref="refPage" style="border: 1px solid rgb(235, 237, 240)" title="超级精灵" sub-title="简约强大的键鼠自动操作编排工具"
+    :avatar="{ src: logo }">
+    <template #tags>
+      <a-tag color="blue">试用版</a-tag>
+    </template>
+    <template #extra>
+      <a-button shape="circle">
+        <MinusOutlined @click="mini" />
+      </a-button>
+      <a-button shape="circle" @click="full">
+        <FullscreenOutlined v-if="state.status === 0" />
+        <FullscreenExitOutlined v-else />
+      </a-button>
+      <a-button shape="circle">
+        <CloseOutlined @click="close" />
+      </a-button>
+    </template>
+  </a-page-header>
+  <div style="padding: 0 8px">
+    <a-tabs>
+      <a-tab-pane key="2" tab="示例功能">
+        <example />
+      </a-tab-pane>
+      <a-tab-pane key="1" tab="超级精灵制作">
+        <make />
+      </a-tab-pane>
+      <a-tab-pane key="3" tab="超级精灵管理">
+        <list />
+      </a-tab-pane>
+    </a-tabs>
+  </div>
 </template>

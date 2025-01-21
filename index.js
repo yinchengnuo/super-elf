@@ -6,27 +6,29 @@ app.commandLine.appendSwitch('ignore-certificate-errors')
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = undefined
 const gotTheLock = app.isPackaged ? app.requestSingleInstanceLock({}) : true
 if (gotTheLock) {
-    app.whenReady().then(() => {
-        powerSaveBlocker.start('prevent-display-sleep')
-        const window = new BrowserWindow({
-            show: false,
-            webPreferences: { webviewTag: true, nodeIntegration: true, contextIsolation: false, allowRunningInsecureContent: true }
-        })
-        if (process.platform === 'win32') window.maximize()
-        if (process.platform === 'darwin') window.setFullScreen(true)
-        app.on('second-instance', () => {
-            if (window) window.focus()
-            if (window && window.isMinimized()) window.restore()
-        })
-        if (app.isPackaged) {
-            window.loadURL('http://localhost:5173/')
-        } else {
-            window.loadURL('http://localhost:5173/')
-        }
-        ipcMain.handle('EVAL', (_, code) => eval(code))
-        window.webContents.once('did-finish-load', () => window.show())
+  app.whenReady().then(() => {
+    powerSaveBlocker.start('prevent-display-sleep')
+    const window = new BrowserWindow({
+      frame: false,
+      webPreferences: {
+        webviewTag: true,
+        nodeIntegration: true,
+        contextIsolation: false,
+        allowRunningInsecureContent: true,
+      },
     })
-    app.on('window-all-closed', () => app.quit())
+    app.on('second-instance', () => {
+      if (window) window.focus()
+      if (window && window.isMinimized()) window.restore()
+    })
+    if (app.isPackaged) {
+      window.loadURL('https://lucent-brioche-c76acd.netlify.app')
+    } else {
+      window.loadURL('http://localhost:5173/')
+    }
+    ipcMain.handle('EVAL', (_, code) => eval(code))
+  })
+  app.on('window-all-closed', () => app.quit())
 } else {
-    app.quit()
+  app.quit()
 }
