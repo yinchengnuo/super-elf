@@ -24,7 +24,4 @@ body,
 .ant-page-header {
   padding: 8px;
 }
-.ant-form-item {
-  margin-bottom: 0px !important;
-}
 </style>

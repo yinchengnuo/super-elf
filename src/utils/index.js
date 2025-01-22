@@ -125,7 +125,7 @@ export const runAction = async (item) =>
       }
     }
     if (item.type === '逻辑操作') {
-      if (item.subType === '延时器') {
+      if (item.subType === '等待执行') {
         await new Promise((resolve) => setTimeout(resolve, item.sleep * 1000))
         resolve()
       }
