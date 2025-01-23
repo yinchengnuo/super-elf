@@ -1,15 +1,16 @@
 <script setup>
+import { reactive } from 'vue'
 import logo from '@/assets/logo.png'
 import make from '@/components/make.vue'
 import list from '@/components/list.vue'
 import example from '@/components/example.vue'
-import { ref, onMounted, reactive } from 'vue'
+import JavaScript from '@/components/JavaScript.vue'
 
 import { MinusOutlined, CloseOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue'
 
 const state = reactive({
   status: 0,
-  activeKey: 3
+  activeKey: 4
 })
 
 const IPC = require('electron').ipcRenderer
@@ -77,6 +78,9 @@ const close = () => {
       </a-tab-pane>
       <a-tab-pane :key="3" tab="超级精灵管理">
         <list :activeKey="state.activeKey" />
+      </a-tab-pane>
+      <a-tab-pane :key="4" tab="常用JavaScript脚本">
+        <JavaScript :activeKey="state.activeKey" />
       </a-tab-pane>
     </a-tabs>
   </div>
