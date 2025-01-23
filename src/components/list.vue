@@ -1,7 +1,8 @@
 <script setup>
 import Make from './make.vue'
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { QuestionCircleOutlined } from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
 
 const refForm = ref()
 const state = reactive({
@@ -24,7 +25,6 @@ const state = reactive({
 const getList = () => {
   try {
     state.list = JSON.parse(localStorage.getItem('list') || '[]')
-    state.list = [...state.list, ...state.list, ...state.list, ...state.list]
   } catch (_) {}
 }
 
@@ -34,15 +34,44 @@ const add = () => {
   state.drawer.data = { details: [] }
 }
 
-const edit = () => {}
+const edit = (record) => {
+  state.drawer.open = true
+  state.drawer.title = '编辑'
+  state.drawer.data = record
+}
 
-const del = () => {}
+const del = (record) => {
+  Modal.confirm({
+    title: '删除',
+    centered: true,
+    content: '确定删除吗？',
+    onOk: () => {
+      state.list.splice(
+        state.list.findIndex((item) => item.id === record.id),
+        1,
+      )
+      localStorage.setItem('list', JSON.stringify(state.list))
+    },
+  })
+}
 
 const save = () => {
   refForm.value.validate().then(() => {
-    console.log(123)
+    if (state.drawer.data.details.length) {
+      if (state.drawer.data.id) {
+        state.list[state.list.findIndex((item) => item.id === state.drawer.data.id)] = state.drawer.data
+      } else {
+        state.list.unshift({ ...state.drawer.data, id: Date.now().toString() })
+      }
+      localStorage.setItem('list', JSON.stringify(state.list))
+      state.drawer.open = false
+    } else {
+      message.warn('没有操作信息')
+    }
   })
 }
+
+const run = () => {}
 
 onMounted(() => {
   getList()
@@ -73,12 +102,12 @@ onMounted(() => {
                 <a-radio-button :value="0">否</a-radio-button>
               </a-radio-group>
             </a-form-item>
-            <a-form-item v-if="state.drawer.data.loop" label="循环间隔" name="interval" :rules="[{ required: true, message: '循环间隔' }]">
+            <a-form-item v-if="state.drawer.data.loop" label="循环间隔" name="interval" :rules="[{ required: true, message: '请输入循环间隔' }]">
               <a-input-number v-model:value="state.drawer.data.interval" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 152px">
                 <template #addonAfter>秒</template>
               </a-input-number>
             </a-form-item>
-            <a-form-item v-if="state.drawer.data.loop" label="循环次数" name="count" :rules="[{ required: true, message: '循环模式' }]">
+            <a-form-item v-if="state.drawer.data.loop" label="循环次数" name="count" :rules="[{ required: true, message: '请输入循环次数' }]">
               <a-input-number v-model:value="state.drawer.data.count" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 152px">
                 <template #addonAfter>
                   <a-tooltip title="输入0表示无限循环">
@@ -135,16 +164,30 @@ onMounted(() => {
         <a-button type="primary" @click="add">新增</a-button>
       </template>
       <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 270px)' }" bordered>
-        <a-table-column title="名称" data-index="name" align="center" :width="100" />
-        <a-table-column title="描述" data-index="age" align="center" :width="100" />
-        <a-table-column title="是否循环" data-index="age" align="center":width="100" />
-        <a-table-column title="操作信息" data-index="age" align="center" />
+        <a-table-column title="名称" data-index="name" align="center" :width="100" :ellipsis="true" />
+        <a-table-column title="描述" data-index="desc" align="center" :width="100" :ellipsis="true" />
+        <a-table-column title="是否循环" data-index="loop" align="center" :width="140" :ellipsis="true">
+          <template #default="{ record }">
+            <template v-if="record.loop">
+              <a-tag>{{ record.interval }}秒</a-tag>
+              <a-tag>{{ record.count || '无限' }}次</a-tag>
+            </template>
+            <a-tag v-else>无</a-tag>
+          </template>
+        </a-table-column>
+        <a-table-column title="操作信息" data-index="details" align="center" :ellipsis="true">
+          <template #default="{ record }">
+            <template v-if="record.details.length">
+              <a-tag v-for="item in record.details" :key="item.id">{{ item.type.replace('操作', '') }}{{ item.subType }}...</a-tag>
+            </template>
+          </template>
+        </a-table-column>
         <a-table-column title="操作" data-index="action" align="center" :width="120">
           <template #default="{ record }">
             <a-space>
-              <a-button type="link" style="padding: 0">运行</a-button>
-              <a-button type="link" style="padding: 0">编辑</a-button>
-              <a-button type="link" style="padding: 0" danger>删除</a-button>
+              <a-button type="link" style="padding: 0" @click="runAction(record)">运行</a-button>
+              <a-button type="link" style="padding: 0" @click="edit(record)">编辑</a-button>
+              <a-button type="link" style="padding: 0" danger @click="del(record)">删除</a-button>
             </a-space>
           </template>
         </a-table-column>
@@ -158,6 +201,7 @@ onMounted(() => {
   margin-bottom: 8px !important;
 }
 :deep(.ant-form-item-explain) {
+  z-index: 9;
   position: absolute;
 }
 </style>
