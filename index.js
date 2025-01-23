@@ -22,7 +22,7 @@ if (gotTheLock) {
       if (window && window.isMinimized()) window.restore()
     })
     if (app.isPackaged) {
-      window.loadURL('https://lucent-brioche-c76acd.netlify.app')
+      window.loadURL('https://superelf.netlify.app/')
     } else {
       window.loadURL('http://localhost:5173/')
     }
