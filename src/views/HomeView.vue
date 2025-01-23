@@ -70,7 +70,7 @@ const close = () => {
   </a-page-header>
   <div style="padding: 0 8px">
     <a-tabs v-model:activeKey="state.activeKey">
-      <a-tab-pane :key="1" tab="超级精灵运行111">
+      <a-tab-pane :key="1" tab="超级精灵运行">
         <example :activeKey="state.activeKey" />
       </a-tab-pane>
       <a-tab-pane :key="2" tab="超级精灵制作">
