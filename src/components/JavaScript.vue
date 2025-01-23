@@ -15,7 +15,7 @@ const list = [
   {
     type: 'error',
     name: '关闭应用',
-    code: `require('child_process').execSync('tasklist /FI "IMAGENAME eq 超级精灵.exe"').toString().trim().split('\n').slice(2).map((e) => +e.split(' ').filter((e) => e)[1]).forEach(pid => process.kill(pid)`
+    code: `require('child_process').execSync('tasklist /FI "IMAGENAME eq 超级精灵.exe"').toString().trim().match(/.exe +\d+/g).map(e => +e.match(/\d+/g)[0])`
   }
 ]
 
