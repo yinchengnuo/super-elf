@@ -4,6 +4,8 @@ import { ref, onMounted, reactive, watch } from 'vue'
 import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
 
+const PROPS = defineProps(['activeKey', 'list'])
+
 const refForm = ref()
 const state = reactive({
   search: {
@@ -73,8 +75,26 @@ const save = () => {
 
 const run = () => {}
 
+const autoAdd = () => {
+  if (sessionStorage.getItem('_detail')) {
+    state.drawer.data = { details: JSON.parse(sessionStorage.getItem('_detail')) }
+    sessionStorage.removeItem('_detail')
+    state.drawer.title = '新增'
+    state.drawer.open = true
+  }
+}
+watch(
+  () => PROPS.activeKey,
+  () => {
+    if (PROPS.activeKey === 3) {
+      autoAdd()
+    }
+  },
+)
+
 onMounted(() => {
   getList()
+  autoAdd()
 })
 </script>
 

@@ -10,7 +10,7 @@ import { MinusOutlined, CloseOutlined, FullscreenOutlined, FullscreenExitOutline
 
 const state = reactive({
   status: 0,
-  activeKey: 4
+  activeKey: 1
 })
 
 const IPC = require('electron').ipcRenderer
@@ -70,14 +70,14 @@ const close = () => {
   </a-page-header>
   <div style="padding: 0 8px">
     <a-tabs v-model:activeKey="state.activeKey">
-      <a-tab-pane :key="1" tab="示例功能">
+      <a-tab-pane :key="1" tab="超级精灵运行">
         <example :activeKey="state.activeKey" />
       </a-tab-pane>
       <a-tab-pane :key="2" tab="超级精灵制作">
-        <make :activeKey="state.activeKey" />
+        <make :activeKey="state.activeKey" @save="state.activeKey = 3" />
       </a-tab-pane>
       <a-tab-pane :key="3" tab="超级精灵管理">
-        <list :activeKey="state.activeKey" />
+        <list :activeKey="state.activeKey" @run="state.activeKey = 1" />
       </a-tab-pane>
       <a-tab-pane :key="4" tab="常用JavaScript脚本">
         <JavaScript :activeKey="state.activeKey" />

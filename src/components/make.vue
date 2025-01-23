@@ -134,9 +134,9 @@ const runAll = async () => {
 const IPC = require('electron').ipcRenderer
 
 const save = () => {
-  // console.log(CurrentInstance)
   if (PROPS.activeKey) {
-
+    EMITS('save', state.list)
+    sessionStorage.setItem('_detail', JSON.stringify(state.list))
   } else {
     EMITS('save', state.list)
   }
