@@ -13,8 +13,8 @@ const SCROLL = {
   向右: 'scrollRight',
 }
 
-export const runAction = async (item) =>
-  new Promise(async (resolve) => {
+export const runAction = async (item, list) =>
+  new Promise(async (resolve, reject) => {
     const code = Date.now()
     if (item.type === '鼠标操作') {
       if (item.subType === '移动至') {

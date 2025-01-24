@@ -33,7 +33,7 @@ const getList = () => {
 const add = () => {
   state.drawer.open = true
   state.drawer.title = '新增'
-  state.drawer.data = { details: [] }
+  state.drawer.data = { delay: 0.2, details: [] }
 }
 
 const edit = (record) => {
@@ -77,7 +77,7 @@ const run = () => {}
 
 const autoAdd = () => {
   if (sessionStorage.getItem('_detail')) {
-    state.drawer.data = { details: JSON.parse(sessionStorage.getItem('_detail')) }
+    state.drawer.data = { delay: 0.2, details: JSON.parse(sessionStorage.getItem('_detail')) }
     sessionStorage.removeItem('_detail')
     state.drawer.title = '新增'
     state.drawer.open = true
@@ -101,7 +101,7 @@ onMounted(() => {
 <template>
   <div style="height: calc(100vh - 128px)">
     <a-modal :open="state.modal.open" :title="state.modal.title" centered :footer="null" width="98vw" height="90vh" destroyOnClose :keyboard="false" :maskClosable="false" @cancel="state.modal.open = false">
-      <Make :list="state.drawer.data.details" @save="((list) => (state.drawer.data.details = list), (state.modal.open = false))" />
+      <Make :delay="state.drawer.data.delay" :list="state.drawer.data.details" @save="((list) => (state.drawer.data.details = list), (state.modal.open = false))" />
     </a-modal>
     <a-drawer height="calc(100vh - 58px)" :title="state.drawer.title" placement="bottom" :open="state.drawer.open" :body-style="{ padding: 0 }" destroyOnClose :keyboard="false" :maskClosable="false" @close="state.drawer.open = false">
       <template #extra>
@@ -115,6 +115,16 @@ onMounted(() => {
             </a-form-item>
             <a-form-item label="描述" name="desc" :rules="[{ required: true, message: '请输入描述' }]">
               <a-input v-model:value="state.drawer.data.desc" placeholder="请输入描述" allowClear style="width: 180px" />
+            </a-form-item>
+            <a-form-item label="操作间隔" name="delay" :rules="[{ required: true, message: '请输入操作间隔' }]">
+              <a-input-number v-model:value="state.drawer.data.delay" :min="0" :step="0.1" :precision="1" @focus="({ target }) => target.select()" style="width: 152px">
+                <template #addonBefore>
+                  <a-tooltip title="每次操作之间的等待时长">
+                    <QuestionCircleOutlined />
+                  </a-tooltip>
+                </template>
+                <template #addonAfter>秒</template>
+              </a-input-number>
             </a-form-item>
             <a-form-item label="是否循环" name="loop" :rules="[{ required: true, message: '请选择是否循环' }]">
               <a-radio-group v-model:value="state.drawer.data.loop" button-style="solid" style="width: 152px">

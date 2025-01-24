@@ -4,8 +4,8 @@ import { getPosition, runAction } from '@/utils'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
-const EMITS = defineEmits(['save'])
-const PROPS = defineProps(['activeKey', 'list'])
+const EMITS = defineEmits(['save', 'more'])
+const PROPS = defineProps(['activeKey', 'list', 'delay'])
 const refScroll = ref()
 
 const state = reactive({
@@ -127,8 +127,8 @@ const run = async (item) => {
 
 const runAll = async () => {
   for (const item of state.list) {
-    await runAction(item)
-    await new Promise((resolve) => setTimeout(resolve, 200))
+    await runAction(item, state.list)
+    await new Promise((resolve) => setTimeout(resolve, PROPS.delay * 1000))
   }
 }
 const IPC = require('electron').ipcRenderer
@@ -162,9 +162,9 @@ onMounted(() => {
     )
   } else {
     timer = setInterval(async () => {
-      const { x, y } = await getPosition()
-      state.x = x
-      state.y = y
+      const pos = await getPosition()
+      state.x = pos.x
+      state.y = pos.y
     }, 50)
   }
   onUnmounted(() => {
@@ -187,7 +187,7 @@ onMounted(() => {
       <a-space>
         <a-button type="primary" :disabled="!list.length || list.some((e) => e._type === 'error')" @click="runAll">运行</a-button>
         <a-button type="primary" :disabled="!list.length || list.some((e) => e._type === 'error')" @click="save">保存</a-button>
-        <a-popconfirm title="确定清空？" @confirm="list.length = 0">
+        <a-popconfirm title="确定清空？" @confirm="state.list.length = 0">
           <a-button type="primary" danger :disabled="!list.length">清空</a-button>
         </a-popconfirm>
       </a-space>
@@ -282,7 +282,24 @@ onMounted(() => {
             </template>
           </template>
           <template #action>
-            <a-button type="link" :disabled="item._type === 'error'" @click="run(item)">运行此操作</a-button>
+            <a-space ref="refScroll" direction="vertical" style="width: 100%">
+              <a-button type="link" :disabled="item._type === 'error'" @click="run(item)">运行此操作</a-button>
+              <a-tooltip placement="left">
+                <template #title>
+                  <h6>理论上可使用此操作实现任何功能，API 支持如下：</h6>
+                  <h5>1、默认支持任意 Web API</h5>
+                  <h5>2、item 对象表示正在执行的操作</h5>
+                  <h5>3、list 对象表示正在执行的流程</h5>
+                  <h5>4、resolve 方法用于结束当前操作</h5>
+                  <h5>5、reject 方法用于结束当前流程</h5>
+                  <h5>6、require 方法支持任意 Nodejs API</h5>
+                  <h5>7、IPC&EVAL 支持所有 Electron API</h5>
+                  <h5>8、IPC&EVAL window 对象为当前窗体</h5>
+                  <h5>9、更多实例见：<a-button type="link" size="small" style="padding: 0;" @click="EMITS('more')">常用JavaScript脚本</a-button> </h5>
+                </template>
+                <a-button v-if="item.subType === 'JavaScript'" type="link">JS 注意事项</a-button>
+              </a-tooltip>
+            </a-space>
           </template>
         </a-alert>
       </div>

@@ -74,7 +74,7 @@ const close = () => {
         <example :activeKey="state.activeKey" />
       </a-tab-pane>
       <a-tab-pane :key="2" tab="超级精灵制作">
-        <make :activeKey="state.activeKey" @save="state.activeKey = 3" />
+        <make :activeKey="state.activeKey" @save="state.activeKey = 3" @more="state.activeKey = 4" />
       </a-tab-pane>
       <a-tab-pane :key="3" tab="超级精灵管理">
         <list :activeKey="state.activeKey" @run="state.activeKey = 1" />
