@@ -297,7 +297,7 @@ onMounted(() => {
                   <h5>8、IPC&EVAL window 对象为当前窗体</h5>
                   <h5>9、更多实例见：<a-button type="link" size="small" style="padding: 0;" @click="EMITS('more')">常用JavaScript脚本</a-button> </h5>
                 </template>
-                <a-button v-if="item.subType === 'JavaScript'" type="link">JS 注意事项</a-button>
+                <a-button v-if="item.subType === 'JavaScript'" type="link" danger>JS 注意事项</a-button>
               </a-tooltip>
             </a-space>
           </template>

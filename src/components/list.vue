@@ -1,8 +1,8 @@
 <script setup>
 import Make from './make.vue'
-import { ref, onMounted, reactive, watch } from 'vue'
-import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { message, Modal } from 'ant-design-vue'
+import { ref, onMounted, reactive, watch } from 'vue'
+import { QuestionCircleOutlined, BugOutlined } from '@ant-design/icons-vue'
 
 const PROPS = defineProps(['activeKey', 'list'])
 
@@ -83,6 +83,21 @@ const autoAdd = () => {
     state.drawer.open = true
   }
 }
+
+function getGentleHexColor() {
+  // 轻柔颜色的特点是高亮度和低饱和度，因此RGB值应集中在中间到高范围，但避免过于鲜艳
+  const gentleBright = Math.floor(Math.random() * 64) + 192 // 介于192到255之间的亮度，确保颜色明亮但不过于刺眼
+  // 另外两个颜色分量应该在中等到亮之间，以保证整体颜色的柔和性
+  const gentleDim1 = Math.floor(Math.random() * 64) + 128
+  const gentleDim2 = Math.floor(Math.random() * 64) + 128
+
+  // 随机决定哪个颜色是gentleBright，其他两个是gentleDim1, gentleDim2
+  const order = [gentleBright.toString(16).padStart(2, '0'), gentleDim1.toString(16).padStart(2, '0'), gentleDim2.toString(16).padStart(2, '0')]
+  order.sort(() => Math.random() - 0.5) // 随机排序
+
+  return '#' + order.join('')
+}
+
 watch(
   () => PROPS.activeKey,
   () => {
@@ -157,19 +172,43 @@ onMounted(() => {
             <a-card-grid v-for="(item, index) in state.drawer.data.details" :key="item.id" style="width: calc((100% - 32px) / 4); margin: 4px; height: 74px; padding: 0">
               <a-card size="small" :bordered="false" :title="`${index + 1}、${item.type}`" :body-style="{ padding: '8px' }" style="width: 100%">
                 <div v-if="item.type.includes('鼠标')">
-                  <span v-if="item.subType === '移动至'">鼠标移动至 X:{{ item.x }} Y:{{ item.y }}</span>
-                  <span v-else-if="item.subType === '滚轮'">滚轮{{ item.subTypeKey }}滚动{{ item.scroll }}</span>
-                  <span v-else>{{ item.subTypeKey }}{{ item.subType }}</span>
+                  <template v-if="item.subType === '移动至'">
+                    <a-tag :color="getGentleHexColor()">鼠标移动至</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.x }}, {{ item.y }}</a-tag>
+                  </template>
+                  <template v-else-if="item.subType === '滚轮'">
+                    <a-tag :color="getGentleHexColor()">滚轮</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.subTypeKey }}</a-tag>
+                    <a-tag :color="getGentleHexColor()">滚动{{ item.scroll }}</a-tag>
+                  </template>
+                  <template v-else>
+                    <a-tag :color="getGentleHexColor()">{{ item.subTypeKey }}</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.subType }}</a-tag>
+                  </template>
                 </div>
                 <div v-if="item.type.includes('键盘')">
-                  <span v-if="item.subType === '输入'">输入：{{ item.text }}</span>
-                  <span v-else>{{ item.subType }}：{{ item.keys.join('+') }}</span>
+                  <template v-if="item.subType === '输入'">
+                    <a-tag :color="getGentleHexColor()">输入</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.text }}</a-tag>
+                  </template>
+                  <template v-else>
+                    <a-tag :color="getGentleHexColor()">{{ item.subType }}</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.keys.join('+') }}</a-tag>
+                  </template>
                 </div>
                 <div v-if="item.type.includes('逻辑')">
-                  <span v-if="item.subType === '等待执行'">等待 {{ item.sleep }} 秒后进行下一步操作</span>
-                  <span v-else
-                    >执行代码：<code>{{ item.code }}</code>
-                  </span>
+                  <template v-if="item.subType === '等待执行'">
+                    <a-tag :color="getGentleHexColor()">等待</a-tag>
+                    <a-tag :color="getGentleHexColor()">{{ item.sleep }} 秒</a-tag>
+                  </template>
+                  <template v-else>
+                    <a-tag :color="getGentleHexColor()">执行代码</a-tag>
+                    <a-tooltip :title="item.code">
+                      <a-tag :color="getGentleHexColor()">
+                        <BugOutlined />
+                      </a-tag>
+                    </a-tooltip>
+                  </template>
                 </div>
               </a-card>
             </a-card-grid>
@@ -194,25 +233,23 @@ onMounted(() => {
         <a-button type="primary" @click="add">新增</a-button>
       </template>
       <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 270px)' }" bordered>
-        <a-table-column title="名称" data-index="name" align="center" :width="100" :ellipsis="true" />
-        <a-table-column title="描述" data-index="desc" align="center" :width="100" :ellipsis="true" />
-        <a-table-column title="是否循环" data-index="loop" align="center" :width="140" :ellipsis="true">
+        <a-table-column title="名称" data-index="name" align="center" :ellipsis="true" />
+        <a-table-column title="描述" data-index="desc" align="center" :ellipsis="true" />
+        <a-table-column title="是否循环" data-index="loop" align="center" :ellipsis="true">
           <template #default="{ record }">
             <template v-if="record.loop">
-              <a-tag>{{ record.interval }}秒</a-tag>
-              <a-tag>{{ record.count || '无限' }}次</a-tag>
+              <a-tag :color="getGentleHexColor()">{{ record.interval }}秒</a-tag>
+              <a-tag :color="getGentleHexColor()">{{ record.count || '无限' }}次</a-tag>
             </template>
             <a-tag v-else>无</a-tag>
           </template>
         </a-table-column>
-        <a-table-column title="操作信息" data-index="details" align="center" :ellipsis="true">
+        <a-table-column title="操作间隔" data-index="details" align="center" :ellipsis="true">
           <template #default="{ record }">
-            <template v-if="record.details.length">
-              <a-tag v-for="item in record.details" :key="item.id">{{ item.type.replace('操作', '') }}{{ item.subType }}...</a-tag>
-            </template>
+            <a-tag :color="getGentleHexColor()">{{ record.delay }}秒</a-tag>
           </template>
         </a-table-column>
-        <a-table-column title="操作" data-index="action" align="center" :width="120">
+        <a-table-column title="操作" data-index="action" align="center">
           <template #default="{ record }">
             <a-space>
               <a-button type="link" style="padding: 0" @click="runAction(record)">运行</a-button>
@@ -233,5 +270,8 @@ onMounted(() => {
 :deep(.ant-form-item-explain) {
   z-index: 9;
   position: absolute;
+}
+.ant-tag {
+  margin: 2px;
 }
 </style>
