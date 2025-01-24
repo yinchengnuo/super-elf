@@ -122,13 +122,13 @@ const add = (item, index) => {
 }
 
 const runOne = async (item) => {
-  await runAction(item)
+  await runAction(item).catch(() => { })
 }
 
 const runAll = async (list) => {
   for (const item of list) {
-    await runAction(item, list)
-    await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0) * 1000))
+    await runAction(item, list).catch(() => { })
+    await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0.2) * 1000))
   }
 }
 
@@ -178,7 +178,7 @@ onMounted(() => {
   <a-card
     :title="`屏幕宽度：${state.width} &nbsp;&nbsp; 屏幕高度：${state.height} &nbsp;&nbsp; 鼠标坐标：${state.x}，${state.y}`"
     :bodyStyle="{
-      height: 'calc(100vh - 186px)',
+      height: 'calc(100vh - 178px)',
       overflow: 'auto',
       paddingTop: '8px',
       paddingBottom: 0,

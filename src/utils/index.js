@@ -143,15 +143,15 @@ export const getPosition = async () =>
   new Promise((resolve) => {
     const code = Date.now()
     require('electron').ipcRenderer.once(code, (_, pos) => resolve(pos))
-    require('electron').ipcRenderer.invoke(
-      'EVAL',
-      `import('@nut-tree/nut-js').then(async ({ mouse }) => window.webContents.send('${code}', await mouse.getPosition()))`,
-    )
+    require('electron').ipcRenderer.invoke('EVAL', `import('@nut-tree/nut-js').then(async ({ mouse }) => window.webContents.send('${code}', await mouse.getPosition()))`)
   })
 
-// export const center = () => {
-//   require('electron').ipcRenderer.invoke(
-//     'EVAL',
-//     `import('@nut-tree/nut-js').then(async ({ mouse: { getPosition }}) => window.webContents.send('${code}', await getPosition()))`,
-//   )
-// }
+export const getGentleHexColor = () => {
+  const gentleBright = Math.floor(Math.random() * 64) + 192
+  const gentleDim1 = Math.floor(Math.random() * 64) + 128
+  const gentleDim2 = Math.floor(Math.random() * 64) + 128
+
+  const order = [gentleBright.toString(16).padStart(2, '0'), gentleDim1.toString(16).padStart(2, '0'), gentleDim2.toString(16).padStart(2, '0')]
+  order.sort(() => Math.random() - 0.5)
+  return '#' + order.join('')
+}

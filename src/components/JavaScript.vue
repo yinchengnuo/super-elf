@@ -52,7 +52,7 @@ const run = (item) => {
 </script>
 
 <template>
-  <div style="height: calc(100vh - 128px); overflow: auto">
+  <div style="height: calc(100vh - 120px); overflow: auto">
     <a-space direction="vertical" style="width: 100%">
       <a-alert v-for="item in list" :key="item.name" :type="item.type">
         <template #message>

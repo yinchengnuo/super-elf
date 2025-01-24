@@ -27,4 +27,7 @@ body,
 .ant-page-header {
   padding: 8px;
 }
+.ant-tabs-nav {
+  margin-bottom: 8px !important;
+}
 </style>

@@ -1,10 +1,12 @@
 <script setup>
 import Make from './make.vue'
-import { runAction } from '@/utils'
+import Actions from './Actions.vue'
 import { message, Modal } from 'ant-design-vue'
 import { ref, onMounted, reactive, watch } from 'vue'
-import { QuestionCircleOutlined, BugOutlined } from '@ant-design/icons-vue'
+import { runAction, getGentleHexColor } from '@/utils'
+import { QuestionCircleOutlined } from '@ant-design/icons-vue'
 
+const EMITS = defineEmits(['run'])
 const PROPS = defineProps(['activeKey', 'list'])
 
 const refForm = ref()
@@ -74,7 +76,10 @@ const save = () => {
   })
 }
 
-const run = () => {}
+const run = (record) => {
+  sessionStorage.setItem('_run', JSON.stringify(record))
+  EMITS('run')
+}
 
 const autoAdd = () => {
   if (sessionStorage.getItem('_detail')) {
@@ -85,23 +90,13 @@ const autoAdd = () => {
   }
 }
 
-const getGentleHexColor = () => {
-  const gentleBright = Math.floor(Math.random() * 64) + 192
-  const gentleDim1 = Math.floor(Math.random() * 64) + 128
-  const gentleDim2 = Math.floor(Math.random() * 64) + 128
-
-  const order = [gentleBright.toString(16).padStart(2, '0'), gentleDim1.toString(16).padStart(2, '0'), gentleDim2.toString(16).padStart(2, '0')]
-  order.sort(() => Math.random() - 0.5)
-  return '#' + order.join('')
-}
-
 const runOne = async (item) => {
-  await runAction(item)
+  await runAction(item).catch(() => {})
 }
 
 const runAll = async (list) => {
   for (const item of list) {
-    await runAction(item, list)
+    await runAction(item, list).catch(() => {})
     await new Promise((resolve) => setTimeout(resolve, (state.drawer.data.delay || 0) * 1000))
   }
 }
@@ -122,7 +117,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div style="height: calc(100vh - 128px)">
+  <div style="height: calc(100vh - 120px)">
     <a-modal :open="state.modal.open" :title="state.modal.title" centered :footer="null" width="98vw" height="90vh" destroyOnClose :keyboard="false" :maskClosable="false" @cancel="state.modal.open = false">
       <Make :delay="state.drawer.data.delay" :list="state.drawer.data.details" @save="((list) => (state.drawer.data.details = list), (state.modal.open = false))" />
     </a-modal>
@@ -156,7 +151,7 @@ onMounted(() => {
               </a-radio-group>
             </a-form-item>
             <a-form-item v-if="state.drawer.data.loop" label="循环间隔" name="interval" :rules="[{ required: true, message: '请输入循环间隔' }]">
-              <a-input-number v-model:value="state.drawer.data.interval" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 152px">
+              <a-input-number v-model:value="state.drawer.data.interval" :min="0" :precision="1" @focus="({ target }) => target.select()" style="width: 152px">
                 <template #addonAfter>秒</template>
               </a-input-number>
             </a-form-item>
@@ -185,45 +180,7 @@ onMounted(() => {
                 <template #extra>
                   <a-button type="link" size="small" @click="runOne(item)">运行</a-button>
                 </template>
-                <div v-if="item.type.includes('鼠标')">
-                  <template v-if="item.subType === '移动至'">
-                    <a-tag :color="getGentleHexColor()">鼠标移动至</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.x }}, {{ item.y }}</a-tag>
-                  </template>
-                  <template v-else-if="item.subType === '滚轮'">
-                    <a-tag :color="getGentleHexColor()">滚轮</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.subTypeKey }}</a-tag>
-                    <a-tag :color="getGentleHexColor()">滚动{{ item.scroll }}</a-tag>
-                  </template>
-                  <template v-else>
-                    <a-tag :color="getGentleHexColor()">{{ item.subTypeKey }}</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.subType }}</a-tag>
-                  </template>
-                </div>
-                <div v-if="item.type.includes('键盘')">
-                  <template v-if="item.subType === '输入'">
-                    <a-tag :color="getGentleHexColor()">输入</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.text }}</a-tag>
-                  </template>
-                  <template v-else>
-                    <a-tag :color="getGentleHexColor()">{{ item.subType }}</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.keys.join('+') }}</a-tag>
-                  </template>
-                </div>
-                <div v-if="item.type.includes('逻辑')">
-                  <template v-if="item.subType === '等待执行'">
-                    <a-tag :color="getGentleHexColor()">等待</a-tag>
-                    <a-tag :color="getGentleHexColor()">{{ item.sleep }} 秒</a-tag>
-                  </template>
-                  <template v-else>
-                    <a-tag :color="getGentleHexColor()">执行代码</a-tag>
-                    <a-tooltip :title="item.code">
-                      <a-tag :color="getGentleHexColor()">
-                        <BugOutlined />
-                      </a-tag>
-                    </a-tooltip>
-                  </template>
-                </div>
+                <Actions :item="item" />
               </a-card>
             </a-card-grid>
           </div>
@@ -246,7 +203,7 @@ onMounted(() => {
       <template #extra>
         <a-button type="primary" @click="add">新增</a-button>
       </template>
-      <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 270px)' }" bordered>
+      <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 262px)' }" bordered>
         <a-table-column title="名称" data-index="name" align="center" />
         <a-table-column title="描述" data-index="desc" align="center" />
         <a-table-column title="是否循环" data-index="loop" align="center">
@@ -266,7 +223,7 @@ onMounted(() => {
         <a-table-column title="操作" data-index="action" align="center" resizable>
           <template #default="{ record }">
             <a-space>
-              <a-button type="link" style="padding: 0" @click="runAction(record)">运行</a-button>
+              <a-button type="link" style="padding: 0" @click="run(record)">运行</a-button>
               <a-button type="link" style="padding: 0" @click="edit(record)">编辑</a-button>
               <a-button type="link" style="padding: 0" danger @click="del(record)">删除</a-button>
             </a-space>
