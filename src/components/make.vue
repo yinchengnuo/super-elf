@@ -2,7 +2,7 @@
 import KEYS from '@/utils/key'
 import { getPosition, runAction } from '@/utils'
 import { PlusOutlined } from '@ant-design/icons-vue'
-import { computed, getCurrentInstance, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
 const EMITS = defineEmits(['save', 'more'])
 const PROPS = defineProps(['activeKey', 'list', 'delay'])
@@ -121,16 +121,17 @@ const add = (item, index) => {
   }
 }
 
-const run = async (item) => {
+const runOne = async (item) => {
   await runAction(item)
 }
 
-const runAll = async () => {
-  for (const item of state.list) {
-    await runAction(item, state.list)
-    await new Promise((resolve) => setTimeout(resolve, PROPS.delay * 1000))
+const runAll = async (list) => {
+  for (const item of list) {
+    await runAction(item, list)
+    await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0) * 1000))
   }
 }
+
 const IPC = require('electron').ipcRenderer
 
 const save = () => {
@@ -185,7 +186,7 @@ onMounted(() => {
   >
     <template #extra>
       <a-space>
-        <a-button type="primary" :disabled="!list.length || list.some((e) => e._type === 'error')" @click="runAll">运行</a-button>
+        <a-button type="primary" :disabled="!list.length || list.some((e) => e._type === 'error')" @click="runAll(state.list)">运行</a-button>
         <a-button type="primary" :disabled="!list.length || list.some((e) => e._type === 'error')" @click="save">保存</a-button>
         <a-popconfirm title="确定清空？" @confirm="state.list.length = 0">
           <a-button type="primary" danger :disabled="!list.length">清空</a-button>
@@ -283,7 +284,7 @@ onMounted(() => {
           </template>
           <template #action>
             <a-space ref="refScroll" direction="vertical" style="width: 100%">
-              <a-button type="link" :disabled="item._type === 'error'" @click="run(item)">运行此操作</a-button>
+              <a-button type="link" :disabled="item._type === 'error'" @click="runOne(item)">运行此操作</a-button>
               <a-tooltip placement="left">
                 <template #title>
                   <h6>理论上可使用此操作实现任何功能，API 支持如下：</h6>

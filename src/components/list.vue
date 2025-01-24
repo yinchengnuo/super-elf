@@ -1,5 +1,6 @@
 <script setup>
 import Make from './make.vue'
+import { runAction } from '@/utils'
 import { message, Modal } from 'ant-design-vue'
 import { ref, onMounted, reactive, watch } from 'vue'
 import { QuestionCircleOutlined, BugOutlined } from '@ant-design/icons-vue'
@@ -84,18 +85,25 @@ const autoAdd = () => {
   }
 }
 
-function getGentleHexColor() {
-  // 轻柔颜色的特点是高亮度和低饱和度，因此RGB值应集中在中间到高范围，但避免过于鲜艳
-  const gentleBright = Math.floor(Math.random() * 64) + 192 // 介于192到255之间的亮度，确保颜色明亮但不过于刺眼
-  // 另外两个颜色分量应该在中等到亮之间，以保证整体颜色的柔和性
+const getGentleHexColor = () => {
+  const gentleBright = Math.floor(Math.random() * 64) + 192
   const gentleDim1 = Math.floor(Math.random() * 64) + 128
   const gentleDim2 = Math.floor(Math.random() * 64) + 128
 
-  // 随机决定哪个颜色是gentleBright，其他两个是gentleDim1, gentleDim2
   const order = [gentleBright.toString(16).padStart(2, '0'), gentleDim1.toString(16).padStart(2, '0'), gentleDim2.toString(16).padStart(2, '0')]
-  order.sort(() => Math.random() - 0.5) // 随机排序
-
+  order.sort(() => Math.random() - 0.5)
   return '#' + order.join('')
+}
+
+const runOne = async (item) => {
+  await runAction(item)
+}
+
+const runAll = async (list) => {
+  for (const item of list) {
+    await runAction(item, list)
+    await new Promise((resolve) => setTimeout(resolve, (state.drawer.data.delay || 0) * 1000))
+  }
 }
 
 watch(
@@ -165,12 +173,18 @@ onMounted(() => {
         </a-card>
         <a-card title="操作信息" :body-style="{ padding: '8px', height: 'calc(100% - 56px)', position: 'relative' }" style="width: 100%; flex: 1">
           <template #extra>
-            <a-button v-if="state.drawer.data.details.length" type="primary" @click="((state.modal.title = '编辑操作'), (state.modal.data = state.drawer.data.details), (state.modal.open = true))">编辑</a-button>
-            <a-button v-else type="primary" @click="((state.modal.title = '新增操作'), (state.modal.data = []), (state.modal.open = true))">新增操作</a-button>
+            <a-space>
+              <a-button v-if="state.drawer.data.details.length" type="primary" @click="runAll(state.drawer.data.details)">运行一次</a-button>
+              <a-button v-if="state.drawer.data.details.length" type="primary" @click="((state.modal.title = '编辑操作'), (state.modal.data = state.drawer.data.details), (state.modal.open = true))">编辑</a-button>
+              <a-button v-else type="primary" @click="((state.modal.title = '新增操作'), (state.modal.data = []), (state.modal.open = true))">新增操作</a-button>
+            </a-space>
           </template>
           <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-wrap: wrap; align-content: flex-start; overflow: auto">
             <a-card-grid v-for="(item, index) in state.drawer.data.details" :key="item.id" style="width: calc((100% - 32px) / 4); margin: 4px; height: 74px; padding: 0">
               <a-card size="small" :bordered="false" :title="`${index + 1}、${item.type}`" :body-style="{ padding: '8px' }" style="width: 100%">
+                <template #extra>
+                  <a-button type="link" size="small" @click="runOne(item)">运行</a-button>
+                </template>
                 <div v-if="item.type.includes('鼠标')">
                   <template v-if="item.subType === '移动至'">
                     <a-tag :color="getGentleHexColor()">鼠标移动至</a-tag>
