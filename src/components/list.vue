@@ -233,9 +233,9 @@ onMounted(() => {
         <a-button type="primary" @click="add">新增</a-button>
       </template>
       <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 270px)' }" bordered>
-        <a-table-column title="名称" data-index="name" align="center" :ellipsis="true" />
-        <a-table-column title="描述" data-index="desc" align="center" :ellipsis="true" />
-        <a-table-column title="是否循环" data-index="loop" align="center" :ellipsis="true">
+        <a-table-column title="名称" data-index="name" align="center" />
+        <a-table-column title="描述" data-index="desc" align="center" />
+        <a-table-column title="是否循环" data-index="loop" align="center">
           <template #default="{ record }">
             <template v-if="record.loop">
               <a-tag :color="getGentleHexColor()">{{ record.interval }}秒</a-tag>
@@ -244,12 +244,12 @@ onMounted(() => {
             <a-tag v-else>无</a-tag>
           </template>
         </a-table-column>
-        <a-table-column title="操作间隔" data-index="details" align="center" :ellipsis="true">
+        <a-table-column title="操作间隔" data-index="details" align="center">
           <template #default="{ record }">
             <a-tag :color="getGentleHexColor()">{{ record.delay }}秒</a-tag>
           </template>
         </a-table-column>
-        <a-table-column title="操作" data-index="action" align="center">
+        <a-table-column title="操作" data-index="action" align="center" resizable>
           <template #default="{ record }">
             <a-space>
               <a-button type="link" style="padding: 0" @click="runAction(record)">运行</a-button>
