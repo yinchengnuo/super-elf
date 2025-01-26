@@ -35,42 +35,36 @@ watch(
         state.elf = JSON.parse(sessionStorage.getItem('_run'))
         sessionStorage.removeItem('_run')
       }
-    } else {
-      if (state.running) {
-        // 停止
-      }
     }
   },
 )
 let timer
 
-const getLogItem = (item) => `${item.type.includes('操作') ? item.type.replace('操作', '') : item.type}${item.subType}${item.subTypeKey || ''}${item.x || ''} ${item.y || ''}${item.scroll || ''}`
+const getTime = () => ` ${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)}`
+
+const restore = () => {
+  Modal.info({
+    centered: true,
+    title: '自动操作已结束',
+    content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
+  })
+  IPC.invoke('EVAL', `window.setAlwaysOnTop(true, 'screen-saver')`)
+  setTimeout(() => IPC.invoke('EVAL', `window.focus()`))
+  setTimeout(() => IPC.invoke('EVAL', `window.setAlwaysOnTop(false, 'screen-saver')`), 123)
+}
 
 const task = async () => {
   for (const item of state.elf.details) {
     state.current = state.elf.details.indexOf(item)
     nextTick(() => stepRefs.value[state.current].$el.scrollIntoView({ behavior: 'smooth', block: 'center' }))
-    state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 开始执行： ${getLogItem(item)}` })
+    state.log.unshift({ id: Date.now().toString(), name: '开始执行', item, color: 'green', time: `${getTime()}` })
     await runAction(item, state.elf.details, state.count + 1)
-      .then(() => {
-        state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行成功： ${getLogItem(item)}` })
-      })
-      .catch(() => {
-        state.log.unshift({ color: 'red', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行失败： ${getLogItem(item)}` })
-      })
-      .finally(() => {
-        nextTick(() => (state.log = state.log.slice(0, 100)))
-      })
+      .then(() => state.log.unshift({ id: Date.now().toString(), name: '执行成功', item, color: 'green', time: `${getTime()}` }))
+      .catch(() => state.log.unshift({ id: Date.now().toString(), name: '开始失败', item, color: 'red', time: `${getTime()}` }))
+      .finally(() => nextTick(() => (state.log = state.log.slice(0, 100))))
     if (state.running === false) {
-      Modal.info({
-        centered: true,
-        title: '自动操作已结束',
-        content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
-      })
-      IPC.invoke('EVAL', `window.setAlwaysOnTop(true, 'screen-saver')`)
-      setTimeout(() => IPC.invoke('EVAL', `window.focus()`))
-      setTimeout(() => IPC.invoke('EVAL', `window.setAlwaysOnTop(false, 'screen-saver')`), 123)
-      return state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 手动停止` })
+      restore()
+      return state.log.unshift({ id: Date.now().toString(), name: '自动操作结束（手动结束）', color: 'green', time: `${getTime()}` })
     }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
   }
@@ -84,6 +78,8 @@ const task = async () => {
       }
     } else {
       stop()
+      restore()
+      state.log.unshift({ id: Date.now().toString(), name: '自动操作结束', color: 'green', time: `${getTime()}` })
     }
   } else {
     stop()
@@ -105,6 +101,7 @@ const run = async () => {
       state.count = 0
       state.current = 0
       state.running = true
+      state.log.length = 0
       state.start = Date.now()
       timer = setInterval(() => (state.time = Date.now() - state.start))
       task()
@@ -151,8 +148,7 @@ const formatDuration = (milliseconds) => {
           </a-descriptions-item>
         </a-descriptions>
         <template #extra>
-          <a-button v-if="state.running" type="primary" danger @click="run">停止</a-button>
-          <a-button v-else type="primary" @click="run">运行</a-button>
+          <a-button v-if="!state.running" type="primary" @click="run">运行</a-button>
         </template>
       </a-page-header>
       <div style="display: flex">
@@ -175,8 +171,13 @@ const formatDuration = (milliseconds) => {
             <a-button v-if="state.time" type="link">已运行 {{ formatDuration(state.time) }}</a-button>
           </template>
           <a-timeline v-if="state.log.length">
-            <a-timeline-item v-for="item in state.log" :key="item.log" :color="item.color">
-              <h5>{{ item.log }}</h5>
+            <a-timeline-item v-for="item in state.log" :key="item.id" :color="item.color">
+              <div>{{ item.time }}</div>
+              <a-tag v-if="item.name === '开始执行'" color="processing">{{ item.name }}</a-tag>
+              <a-tag v-else-if="item.name === '执行成功'" color="success">{{ item.name }}</a-tag>
+              <a-tag v-else-if="item.name === '开始失败'" color="error">{{ item.name }}</a-tag>
+              <a-tag v-else>{{ item.name }}</a-tag>
+              <Actions v-if="item.item" :item="item.item" text />
             </a-timeline-item>
           </a-timeline>
           <a-empty v-else :image="image" description="暂无日志" style="margin-top: 25%" />

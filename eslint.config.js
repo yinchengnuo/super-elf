@@ -8,11 +8,8 @@ export default [
     files: ['**/*.{js,mjs,jsx,vue}'],
     globals: {
       $: 'writable',
-      global: 'writable',
-      Buffer: 'writable',
       process: 'writable',
-      require: 'writable',
-      __dirname: 'writable',
+      require: 'writable'
     },
   },
 

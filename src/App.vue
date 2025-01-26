@@ -30,4 +30,7 @@ body,
 .ant-tabs-nav {
   margin-bottom: 8px !important;
 }
+.ant-timeline-item {
+  padding-bottom: 6px!important;
+}
 </style>
