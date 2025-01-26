@@ -54,7 +54,7 @@
       "icon": "src/assets/logo.png"
     },
     "publish": {
-      "url": "https://cjjl.netlify.app/",
+      "url": "",
       "provider": "generic"
     }
   }
