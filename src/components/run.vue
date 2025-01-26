@@ -2,11 +2,13 @@
 import { runAction } from '@/utils'
 import Actions from './Actions.vue'
 import image from '@/assets/logo.png'
-import { ref, reactive, watch, nextTick } from 'vue'
+import { Modal } from 'ant-design-vue'
+import { ref, reactive, watch, nextTick, h } from 'vue'
 
 const stepRefs = ref([])
 const EMITS = defineEmits('to')
 const PROPS = defineProps(['activeKey'])
+const IPC = require('electron').ipcRenderer
 
 const state = reactive({
   elf: {},
@@ -42,38 +44,40 @@ watch(
 )
 let timer
 
+const getLogItem = (item) => `${item.type.includes('操作') ? item.type.replace('操作', '') : item.type}${item.subType}${item.subTypeKey || ''}${item.x || ''} ${item.y || ''}${item.scroll || ''}`
+
 const task = async () => {
   for (const item of state.elf.details) {
     state.current = state.elf.details.indexOf(item)
     nextTick(() => stepRefs.value[state.current].$el.scrollIntoView({ behavior: 'smooth', block: 'center' }))
-    state.log.unshift({
-      log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 开始执行： ${item.type.includes('操作') ? item.type.replace('操作', '') : item.type}${item.subType}${item.subTypeKey || ''}${item.x || ''} ${item.y || ''}${item.scroll || ''}`,
-      color: 'green',
-    })
-    await runAction(item, state.elf.details)
+    state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 开始执行： ${getLogItem(item)}` })
+    await runAction(item, state.elf.details, state.count + 1)
       .then(() => {
-        state.log.unshift({
-          log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行成功： ${item.type.includes('操作') ? item.type.replace('操作', '') : item.type}${item.subType}${item.subTypeKey || ''}${item.x || ''} ${item.y || ''}${item.scroll || ''}`,
-          color: 'green',
-        })
+        state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行成功： ${getLogItem(item)}` })
       })
       .catch(() => {
-        state.log.unshift({
-          log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行失败： ${item.type.includes('操作') ? item.type.replace('操作', '') : item.type}${item.subType}${item.subTypeKey || ''}${item.x || ''} ${item.y || ''}${item.scroll || ''}`,
-          color: 'red',
-        })
+        state.log.unshift({ color: 'red', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 执行失败： ${getLogItem(item)}` })
       })
       .finally(() => {
         nextTick(() => (state.log = state.log.slice(0, 100)))
       })
+    if (state.running === false) {
+      Modal.info({
+        title: '自动操作已结束',
+        content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
+      })
+      return state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 手动停止` })
+    }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
   }
   state.count++
   if (state.elf.loop) {
     if (state.count < state.elf.count) {
-      state.timer = setTimeout(() => {
-        task()
-      }, state.elf.interval * 1000)
+      if (state.running) {
+        state.timer = setTimeout(() => {
+          task()
+        }, state.elf.interval * 1000)
+      }
     } else {
       stop()
     }
@@ -83,20 +87,29 @@ const task = async () => {
 }
 
 const run = async () => {
-  state.time = 0
-  state.count = 0
-  state.current = 0
-  state.running = true
-  state.start = Date.now()
-  timer = setInterval(() => {
-    state.time = Date.now() - state.start
+  Modal.confirm({
+    title: '确认开始自动操作',
+    content: h('ol', { style: 'color:red;' }, [h('li', '自动操作开始后请勿操作键盘鼠标，以免造成误操作'), h('li', '使用键盘左上角的 Esc 键可退出自动操作')]),
+    onOk() {
+      IPC.once('esc', () => {
+        stop()
+        IPC.invoke('EVAL', `import('electron').then(({ globalShortcut }) => globalShortcut.unregister('Escape'))`).catch(() => {})
+      })
+      IPC.invoke('EVAL', `import('electron').then(({ globalShortcut }) => globalShortcut.register('Escape', () => window.webContents.send('esc')))`).catch(() => {})
+      state.time = 0
+      state.count = 0
+      state.current = 0
+      state.running = true
+      state.start = Date.now()
+      timer = setInterval(() => (state.time = Date.now() - state.start))
+      task()
+    },
   })
-  task()
 }
 
 const stop = () => {
-  state.running = false
   clearInterval(timer)
+  state.running = false
   clearTimeout(state.timer)
 }
 
@@ -110,7 +123,7 @@ const formatDuration = (milliseconds) => {
   const formattedMinutes = minutes.toString().padStart(2, '0')
   const formattedSeconds = seconds.toString().padStart(2, '0')
 
-  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${milliseconds.toString().slice(-3)}`
 }
 </script>
 

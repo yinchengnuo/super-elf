@@ -13,7 +13,7 @@ const SCROLL = {
   向右: 'scrollRight',
 }
 
-export const runAction = async (item, list) =>
+export const runAction = async (item, list, count) =>
   new Promise(async (resolve, reject) => {
     const code = Date.now()
     if (item.type === '鼠标操作') {
@@ -91,7 +91,25 @@ export const runAction = async (item, list) =>
         ).catch(() => {})
       }
       if (item.subType === '敲击') {
-        IPC.once(code, () => resolve())
+        if (item.keys.toString() === 'Escape' && count) {
+          await new Promise((resolve) => {
+            IPC.once(code, resolve)
+            IPC.invoke('EVAL', `import('electron').then(({ globalShortcut }) => {
+              globalShortcut.unregister('Escape')
+              window.webContents.send('${code}')
+            })`).catch(() => { })
+          })
+        }
+        IPC.once(code, async () => {
+          await new Promise((_resolve) => {
+            IPC.once(code, _resolve)
+            IPC.invoke('EVAL', `import('electron').then(({ globalShortcut }) => {
+              globalShortcut.register('Escape', () => window.webContents.send('esc'))
+              window.webContents.send('${code}')
+            })`).catch(() => { })
+          })
+          resolve()
+        })
         IPC.invoke(
           'EVAL',
           `import('@nut-tree/nut-js').then(async ({ keyboard }) => {

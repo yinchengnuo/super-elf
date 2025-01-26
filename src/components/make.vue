@@ -285,18 +285,20 @@ onMounted(() => {
           <template #action>
             <a-space ref="refScroll" direction="vertical" style="width: 100%">
               <a-button type="link" :disabled="item._type === 'error'" @click="runOne(item)">运行此操作</a-button>
-              <a-tooltip placement="left">
+              <a-tooltip>
                 <template #title>
                   <h6>理论上可使用此操作实现任何功能，API 支持如下：</h6>
                   <h5>1、默认支持任意 Web API</h5>
                   <h5>2、item 对象表示正在执行的操作</h5>
                   <h5>3、list 对象表示正在执行的流程</h5>
-                  <h5>4、resolve 方法用于结束当前操作</h5>
-                  <h5>5、reject 方法用于结束当前流程</h5>
-                  <h5>6、require 方法支持任意 Nodejs API</h5>
-                  <h5>7、IPC&EVAL 支持所有 Electron API</h5>
-                  <h5>8、IPC&EVAL window 对象为当前窗体</h5>
-                  <h5>9、更多实例见：<a-button type="link" size="small" style="padding: 0;" @click="EMITS('more')">常用JavaScript脚本</a-button> </h5>
+                  <h5>4、count 表示正在执行第 count 次</h5>
+                  <h5>count 可用于区分单次执行和循环执行</h5>
+                  <h5>5、resolve 方法用于结束当前操作</h5>
+                  <h5>6、reject 方法用于结束当前流程</h5>
+                  <h5>7、require 方法支持任意 Nodejs API</h5>
+                  <h5>8、IPC&EVAL 支持所有 Electron API</h5>
+                  <h5>9、IPC&EVAL window 对象为当前窗体</h5>
+                  <h5>更多实例见：<a-button type="link" size="small" style="padding: 0;" @click="EMITS('more')">常用JavaScript脚本</a-button> </h5>
                 </template>
                 <a-button v-if="item.subType === 'JavaScript'" type="link" danger>JS 注意事项</a-button>
               </a-tooltip>
