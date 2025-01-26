@@ -67,7 +67,9 @@ const task = async () => {
         title: '自动操作已结束',
         content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
       })
-      IPC.invoke('EVAL', `window.focus()`)
+      IPC.invoke('EVAL', `window.setAlwaysOnTop(true, 'screen-saver')`)
+      setTimeout(() => IPC.invoke('EVAL', `window.focus()`))
+      setTimeout(() => IPC.invoke('EVAL', `window.setAlwaysOnTop(false, 'screen-saver')`), 123)
       return state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 手动停止` })
     }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
