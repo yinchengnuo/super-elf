@@ -63,9 +63,11 @@ const task = async () => {
       })
     if (state.running === false) {
       Modal.info({
+        centered: true,
         title: '自动操作已结束',
         content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
       })
+      IPC.invoke('EVAL', `window.focus()`)
       return state.log.unshift({ color: 'green', log: `${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)} 手动停止` })
     }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
@@ -88,6 +90,7 @@ const task = async () => {
 
 const run = async () => {
   Modal.confirm({
+    centered: true,
     title: '确认开始自动操作',
     content: h('ol', { style: 'color:red;' }, [h('li', '自动操作开始后请勿操作键盘鼠标，以免造成误操作'), h('li', '使用键盘左上角的 Esc 键可退出自动操作')]),
     onOk() {
