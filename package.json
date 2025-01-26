@@ -34,7 +34,8 @@
     "wait-on": "^8.0.2"
   },
   "dependencies": {
-    "@nut-tree/nut-js": "^3.1.2"
+    "@nut-tree/nut-js": "^3.1.2",
+    "electron-updater": "^6.3.9"
   },
   "build": {
     "files": [
@@ -53,7 +54,7 @@
       "icon": "src/assets/logo.png"
     },
     "publish": {
-      "url": "https://mp-f3138cb7-2a3b-4344-8e79-a1f65871aab2.cdn.bspapp.com/super-elf/",
+      "url": "https://cjjl.netlify.app/",
       "provider": "generic"
     }
   }
