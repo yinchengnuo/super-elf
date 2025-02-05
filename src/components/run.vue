@@ -54,17 +54,26 @@ const restore = () => {
 }
 
 const task = async () => {
+  let running = true
   for (const item of state.elf.details) {
+    if (running === false) break
     state.current = state.elf.details.indexOf(item)
     nextTick(() => stepRefs.value[state.current].$el.scrollIntoView({ behavior: 'smooth', block: 'center' }))
     state.log.unshift({ id: Date.now().toString(), name: '开始执行', item, color: 'green', time: `${getTime()}` })
     await runAction(item, state.elf.details, state.count + 1)
       .then(() => state.log.unshift({ id: Date.now().toString(), name: '执行成功', item, color: 'green', time: `${getTime()}` }))
-      .catch(() => state.log.unshift({ id: Date.now().toString(), name: '开始失败', item, color: 'red', time: `${getTime()}` }))
+      .catch((e) => {
+        running = false
+        if (e === true) {
+          stop()
+        } else {
+          state.log.unshift({ id: Date.now().toString(), name: '执行失败：逻辑终止', item, color: 'red', time: `${getTime()}` })
+        }
+      })
       .finally(() => nextTick(() => (state.log = state.log.slice(0, 100))))
     if (state.running === false) {
       restore()
-      return state.log.unshift({ id: Date.now().toString(), name: '自动操作结束（手动结束）', color: 'green', time: `${getTime()}` })
+      return state.log.unshift({ id: Date.now().toString(), name: '自动操作结束', color: 'green', time: `${getTime()}` })
     }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
   }

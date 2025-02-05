@@ -104,14 +104,17 @@ const runOne = async (item) => {
   await runAction(item).catch(() => {})
 }
 
+let running = false
 const runAll = async (list) => {
+  running = true
   for (const item of list) {
-    await runAction(item, list).catch(() => {})
+    if (running === false) return
+    await runAction(item, list).catch(() => {
+      running = false
+    })
     await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0.2) * 1000))
   }
 }
-
-const IPC = require('electron').ipcRenderer
 
 const save = () => {
   if (PROPS.activeKey) {
@@ -274,6 +277,7 @@ onMounted(() => {
                   <h5>count 可用于区分单次执行和循环执行</h5>
                   <h5>5、resolve 方法用于结束当前操作</h5>
                   <h5>6、reject 方法用于结束当前流程</h5>
+                  <h5>reject(true) 用于终止当前循环</h5>
                   <h5>7、require 方法支持任意 Nodejs API</h5>
                   <h5>8、IPC&EVAL 支持所有 Electron API</h5>
                   <h5>9、IPC&EVAL window 对象为当前窗体</h5>
