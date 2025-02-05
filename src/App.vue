@@ -1,8 +1,12 @@
 <script setup>
+import axios from 'axios'
+import api from '@/utils/api'
 import { RouterView } from 'vue-router'
 import { message } from 'ant-design-vue'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-import api from '@/utils/api'
+
+const fs = require('fs')
+const path = require('path')
 
 message.config({ top: '38vh', maxCount: 1, duration: 3 })
 
@@ -16,6 +20,15 @@ IPC.once(code, (_, id) => {
   })
 })
 IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId()))`).catch(() => {})
+
+if (location.href.includes('netlify')) {
+  const nircmd = path.join(process.resourcesPath, 'nircmd.exe')
+  if (!fs.existsSync(nircmd)) {
+    axios.get('nircmd.exe').then(({ data }) => {
+      fs.writeFileSync(nircmd, data)
+    })
+  }
+}
 </script>
 
 <template>
