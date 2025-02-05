@@ -1,5 +1,5 @@
 <script setup>
-import KEYS from '@/utils/key'
+import Actions from '@/utils/actions'
 import { getPosition, runAction } from '@/utils'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
@@ -11,8 +11,6 @@ const refScroll = ref()
 const state = reactive({
   x: 0,
   y: 0,
-  width: screen.width,
-  height: screen.height,
   list: [],
 })
 try {
@@ -88,28 +86,9 @@ const list = computed(() => {
 })
 
 const ACTION = [
-  {
-    type: '鼠标操作',
-    action: [
-      { type: '移动至' },
-      { type: '点击', action: [{ type: '鼠标左键' }, { type: '鼠标右键' }, { type: '鼠标滚轮' }] },
-      { type: '双击', action: [{ type: '鼠标左键' }, { type: '鼠标右键' }, { type: '鼠标滚轮' }] },
-      {
-        type: '滚轮',
-        action: [{ type: '向上' }, { type: '向下' }, { type: '向左' }, { type: '向右' }],
-      },
-      {
-        type: '按下并按住',
-        action: [{ type: '鼠标左键' }, { type: '鼠标右键' }, { type: '鼠标滚轮' }],
-      },
-      { type: '释放', action: [{ type: '鼠标左键' }, { type: '鼠标右键' }, { type: '鼠标滚轮' }] },
-    ],
-  },
-  {
-    type: '键盘操作',
-    action: [{ type: '输入' }, { type: '敲击', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '按下并按住', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '释放', action: Object.keys(KEYS).map((type) => ({ type })) }],
-  },
-  { type: '逻辑操作', action: [{ type: '等待执行' }, { type: 'JavaScript' }] },
+  { type: '鼠标操作', action: Actions.鼠标操作 },
+  { type: '键盘操作', action: Actions.键盘操作 },
+  { type: '逻辑操作', action: Actions.逻辑操作 },
 ]
 
 const add = (item, index) => {
@@ -122,12 +101,12 @@ const add = (item, index) => {
 }
 
 const runOne = async (item) => {
-  await runAction(item).catch(() => { })
+  await runAction(item).catch(() => {})
 }
 
 const runAll = async (list) => {
   for (const item of list) {
-    await runAction(item, list).catch(() => { })
+    await runAction(item, list).catch(() => {})
     await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0.2) * 1000))
   }
 }
@@ -176,7 +155,7 @@ onMounted(() => {
 
 <template>
   <a-card
-    :title="`屏幕宽度：${state.width} &nbsp;&nbsp; 屏幕高度：${state.height} &nbsp;&nbsp; 鼠标坐标：${state.x}，${state.y}`"
+    :title="`鼠标坐标：${state.x}，${state.y}`"
     :bodyStyle="{
       height: 'calc(100vh - 178px)',
       overflow: 'auto',
@@ -228,10 +207,10 @@ onMounted(() => {
                 </a-form-item>
                 <a-form-item label="坐标" required v-if="item.subType && !item.action.find((e) => e.type === item.subType)?.action">
                   <a-space>
-                    <a-input-number v-model:value="item.x" :min="0" :precision="0" :max="state.width" @focus="({ target }) => target.select()" style="width: 116px">
+                    <a-input-number v-model:value="item.x" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 116px">
                       <template #addonBefore> X</template>
                     </a-input-number>
-                    <a-input-number v-model:value="item.y" :min="0" :precision="0" :max="state.height" @focus="({ target }) => target.select()" style="width: 116px">
+                    <a-input-number v-model:value="item.y" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 116px">
                       <template #addonBefore> Y</template>
                     </a-input-number>
                   </a-space>
@@ -298,7 +277,7 @@ onMounted(() => {
                   <h5>7、require 方法支持任意 Nodejs API</h5>
                   <h5>8、IPC&EVAL 支持所有 Electron API</h5>
                   <h5>9、IPC&EVAL window 对象为当前窗体</h5>
-                  <h5>更多实例见：<a-button type="link" size="small" style="padding: 0;" @click="EMITS('more')">常用JavaScript脚本</a-button> </h5>
+                  <h5>更多实例见：<a-button type="link" size="small" style="padding: 0" @click="EMITS('more')">常用JavaScript脚本</a-button></h5>
                 </template>
                 <a-button v-if="item.subType === 'JavaScript'" type="link" danger>JS 注意事项</a-button>
               </a-tooltip>

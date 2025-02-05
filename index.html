@@ -4,12 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>超级精灵</title>
-    <script>
-      const code = Date.now()
-      const IPC = require('electron').ipcRenderer
-      IPC.once(code, (_, id) => (window.id = id))
-      IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId()))`).catch(() => {})
-    </script>
   </head>
   <body>
     <div id="app"></div>
