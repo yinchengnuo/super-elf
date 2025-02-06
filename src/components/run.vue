@@ -167,6 +167,14 @@ const formatDuration = (milliseconds) => {
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${milliseconds.toString().slice(-3)}`
 }
+
+const TEST = () => {
+  state.elf.hide && IPC.invoke('EVAL', `
+  clock = new BrowserWindow({ frame: false, x: 100, y: 100, width: 100, transpanent: true, height: 100, alwaysOnTop: true, skipTaskbar: true });
+  clock.loadURL('https://superelf.netlify.app/clock.html')
+  mainWindow.setIgnoreMouseEvents(true);
+  `)
+}
 </script>
 
 <template>
@@ -199,6 +207,7 @@ const formatDuration = (milliseconds) => {
         </a-descriptions>
         <template #extra>
           <a-button v-if="!state.running" type="primary" @click="run">运行</a-button>
+          <a-button v-if="!state.running" type="primary" @click="TEST">TEST</a-button>
         </template>
       </a-page-header>
       <div style="display: flex">
