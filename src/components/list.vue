@@ -94,10 +94,15 @@ const runOne = async (item) => {
   await runAction(item).catch(() => {})
 }
 
+let running = false
 const runAll = async (list) => {
+  running = true
   for (const item of list) {
-    await runAction(item, list).catch(() => {})
-    await new Promise((resolve) => setTimeout(resolve, (state.drawer.data.delay || 0) * 1000))
+    if (running === false) return
+    await runAction(item, list).catch(() => {
+      running = false
+    })
+    await new Promise((resolve) => setTimeout(resolve, (PROPS.delay || 0.2) * 1000))
   }
 }
 

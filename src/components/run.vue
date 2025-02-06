@@ -16,6 +16,7 @@ const state = reactive({
   count: 0,
   current: 0,
   running: false,
+  loopWaitting: 0,
   start: Date.now(),
   log: [],
 })
@@ -55,6 +56,7 @@ const restore = () => {
 
 const task = async () => {
   let running = true
+  state.loopWaitting = 0
   for (const item of state.elf.details) {
     if (running === false) break
     state.current = state.elf.details.indexOf(item)
@@ -81,7 +83,7 @@ const task = async () => {
   if (state.elf.loop) {
     if (state.count < state.elf.count) {
       if (state.running) {
-        state.loopStart = Date.now()
+        state.loopWaitting = Date.now()
         state.timer = setTimeout(() => {
           task()
         }, state.elf.interval * 1000)
@@ -114,11 +116,10 @@ const run = async () => {
       state.log.length = 0
       state.start = Date.now()
       timer = setInterval(() => (state.time = Date.now() - state.start))
-      task()
       if(state.elf.iife) {
         task()
       } else {
-        state.loopStart = Date.now()
+        state.loopWaitting = Date.now()
         state.timer = setTimeout(() => {
           task()
         }, state.elf.delay * 1000)
