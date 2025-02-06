@@ -44,8 +44,10 @@ let timer
 
 const getTime = () => ` ${new Date().toLocaleString()}.${new Date().getTime().toString().slice(-3)}`
 
+let modal
 const restore = () => {
-  Modal.info({
+  if (modal) modal?.destroy()
+  modal = Modal.info({
     centered: true,
     title: '自动操作已结束',
     content: `共运行了 ${state.count} 次，执行了 ${state.count * state.elf.details.length + state.current + 1} 次操作，耗时 ${formatDuration(state.time)}`,
@@ -159,7 +161,6 @@ const run = async () => {
 }
 
 const stop = () => {
-  console.log(12312321)
   restore()
   clearInterval(timer)
   state.running = false
