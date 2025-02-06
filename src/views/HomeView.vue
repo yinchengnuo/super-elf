@@ -1,9 +1,9 @@
 <script setup>
-import { reactive } from 'vue'
 import logo from '@/assets/logo.png'
 import run from '@/components/run.vue'
 import make from '@/components/make.vue'
 import list from '@/components/list.vue'
+import { reactive, onMounted } from 'vue'
 import JavaScript from '@/components/JavaScript.vue'
 
 import { MinusOutlined, CloseOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue'
@@ -47,6 +47,10 @@ const full = () => {
 const close = () => {
   IPC.invoke('EVAL', `app.quit()`).catch(() => {})
 }
+
+onMounted(() => {
+  full()
+})
 </script>
 
 <template>

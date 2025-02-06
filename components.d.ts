@@ -48,6 +48,7 @@ declare module 'vue' {
     JavaScript: typeof import('./src/components/JavaScript.vue')['default']
     List: typeof import('./src/components/list.vue')['default']
     Make: typeof import('./src/components/make.vue')['default']
+    Market: typeof import('./src/components/market.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Run: typeof import('./src/components/run.vue')['default']

@@ -81,6 +81,7 @@ const task = async () => {
   if (state.elf.loop) {
     if (state.count < state.elf.count) {
       if (state.running) {
+        state.loopStart = Date.now()
         state.timer = setTimeout(() => {
           task()
         }, state.elf.interval * 1000)
@@ -114,6 +115,15 @@ const run = async () => {
       state.start = Date.now()
       timer = setInterval(() => (state.time = Date.now() - state.start))
       task()
+      if(state.elf.iife) {
+        task()
+      } else {
+        state.loopStart = Date.now()
+        state.timer = setTimeout(() => {
+          task()
+        }, state.elf.delay * 1000)
+      }
+      state.elf.hide && IPC.invoke('EVAL', `window.hide()`)
     },
   })
 }
@@ -122,6 +132,7 @@ const stop = () => {
   clearInterval(timer)
   state.running = false
   clearTimeout(state.timer)
+  state.elf.hide && IPC.invoke('EVAL', `window.show()`)
 }
 
 const formatDuration = (milliseconds) => {
@@ -146,6 +157,9 @@ const formatDuration = (milliseconds) => {
           <a-tag :color="state.running ? 'error' : 'processing'">{{ state.running ? '运行中' : '未运行' }}</a-tag>
         </template>
         <a-descriptions size="small" :column="3">
+          <a-descriptions-item label="运行时隐藏本应用">
+            <a-tag>{{ state.elf.hide ? '是' : '否' }}</a-tag>
+          </a-descriptions-item>
           <a-descriptions-item label="操作间隔">
             <a-tag>{{ state.elf.delay }}秒</a-tag>
           </a-descriptions-item>
@@ -155,13 +169,19 @@ const formatDuration = (milliseconds) => {
           <a-descriptions-item label="循环次数">
             <a-tag>{{ state.elf.loop ? state.elf.count + '次' : '不循环' }}</a-tag>
           </a-descriptions-item>
+          <a-descriptions-item label="运行后立即执行">
+            <a-tag>{{ state.elf.loop ? state.elf.iife ? '是' : '否' : '不循环' }}</a-tag>
+          </a-descriptions-item>
+          <a-descriptions-item label="循环间隔倒计时">
+            <a-tag>{{ state.elf.loop ? state.elf.clock ? '是' : '否' : '不循环' }}</a-tag>
+          </a-descriptions-item>
         </a-descriptions>
         <template #extra>
           <a-button v-if="!state.running" type="primary" @click="run">运行</a-button>
         </template>
       </a-page-header>
       <div style="display: flex">
-        <a-card title="运行步骤" size="small" style="flex: 1" :bodyStyle="{ height: 'calc(100vh - 256px)', padding: '16px', overflow: 'auto' }">
+        <a-card title="运行步骤" size="small" style="flex: 1" :bodyStyle="{ height: 'calc(100vh - 286px)', padding: '16px', overflow: 'auto' }">
           <template #extra>
             <a-button v-if="state.count" type="link">已运行 {{ state.count }} 次</a-button>
           </template>
@@ -174,8 +194,8 @@ const formatDuration = (milliseconds) => {
             </a-step>
           </a-steps>
         </a-card>
-        <a-divider type="vertical" style="height: calc(100vh - 222px)" />
-        <a-card title="运行日志" size="small" style="flex: 1" :bodyStyle="{ height: 'calc(100vh - 256px)', padding: '16px', overflow: 'auto' }">
+        <a-divider type="vertical" style="height: calc(100vh - 252px)" />
+        <a-card title="运行日志" size="small" style="flex: 1" :bodyStyle="{ height: 'calc(100vh - 286px)', padding: '16px', overflow: 'auto' }">
           <template #extra>
             <a-button v-if="state.time" type="link">已运行 {{ formatDuration(state.time) }}</a-button>
           </template>

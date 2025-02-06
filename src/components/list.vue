@@ -144,6 +144,12 @@ onMounted(() => {
                 <template #addonAfter>秒</template>
               </a-input-number>
             </a-form-item>
+            <a-form-item label="运行时隐藏本应用" name="hide" :rules="[{ required: true, message: '请选择运行时是否隐藏本应用' }]">
+              <a-radio-group v-model:value="state.drawer.data.hide" button-style="solid" style="width: 96px">
+                <a-radio-button :value="1">是</a-radio-button>
+                <a-radio-button :value="0">否</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
             <a-form-item label="是否循环" name="loop" :rules="[{ required: true, message: '请选择是否循环' }]">
               <a-radio-group v-model:value="state.drawer.data.loop" button-style="solid" style="width: 152px">
                 <a-radio-button :value="1">是</a-radio-button>
@@ -151,7 +157,7 @@ onMounted(() => {
               </a-radio-group>
             </a-form-item>
             <a-form-item v-if="state.drawer.data.loop" label="循环间隔" name="interval" :rules="[{ required: true, message: '请输入循环间隔' }]">
-              <a-input-number v-model:value="state.drawer.data.interval" :min="0" :precision="1" @focus="({ target }) => target.select()" style="width: 152px">
+              <a-input-number v-model:value="state.drawer.data.interval" :min="0" :precision="0" @focus="({ target }) => target.select()" style="width: 152px">
                 <template #addonAfter>秒</template>
               </a-input-number>
             </a-form-item>
@@ -163,6 +169,18 @@ onMounted(() => {
                   </a-tooltip>
                 </template>
               </a-input-number>
+            </a-form-item>
+            <a-form-item v-if="state.drawer.data.loop" label="运行后立即执行" name="loop" :rules="[{ required: true, message: '请选择运行后是否立即执行一次' }]">
+              <a-radio-group v-model:value="state.drawer.data.iife" button-style="solid" style="width: 100px">
+                <a-radio-button :value="1">是</a-radio-button>
+                <a-radio-button :value="0">否</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item v-if="state.drawer.data.loop" label="循环间隔倒计时" name="loop" :rules="[{ required: true, message: '请选择是否循环' }]">
+              <a-radio-group v-model:value="state.drawer.data.clock" button-style="solid" style="width: 100px">
+                <a-radio-button :value="1">是</a-radio-button>
+                <a-radio-button :value="0">否</a-radio-button>
+              </a-radio-group>
             </a-form-item>
           </a-form>
         </a-card>
@@ -206,11 +224,19 @@ onMounted(() => {
       <a-table size="small" :pagination="false" :data-source="state.list" :scroll="{ x: '100%', y: 'calc(100vh - 262px)' }" bordered>
         <a-table-column title="名称" data-index="name" align="center" />
         <a-table-column title="描述" data-index="desc" align="center" />
+        <a-table-column title="运行时隐藏本应用" data-index="hide" align="center">
+          <template #default="{ record }">
+            <a-tag v-if="record.hide" color="processing">是</a-tag>
+            <a-tag v-else color="error">否</a-tag>
+          </template>
+        </a-table-column>
         <a-table-column title="是否循环" data-index="loop" align="center">
           <template #default="{ record }">
             <template v-if="record.loop">
               <a-tag :color="getGentleHexColor()">{{ record.interval }}秒</a-tag>
               <a-tag :color="getGentleHexColor()">{{ record.count || '无限' }}次</a-tag>
+              <a-tag v-if="record.iife" :color="getGentleHexColor()">运行后立即执行</a-tag>
+              <a-tag v-if="record.clock" :color="getGentleHexColor()">倒计时</a-tag>
             </template>
             <a-tag v-else>无</a-tag>
           </template>
