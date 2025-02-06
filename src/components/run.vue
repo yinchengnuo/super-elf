@@ -75,7 +75,6 @@ const task = async () => {
       })
       .finally(() => nextTick(() => (state.log = state.log.slice(0, 100))))
     if (state.running === false) {
-      restore()
       return state.log.unshift({ id: Date.now().toString(), name: '自动操作结束', color: 'green', time: `${getTime()}` })
     }
     await new Promise((resolve) => setTimeout(resolve, (state.elf.delay || 0) * 1000))
@@ -91,7 +90,6 @@ const task = async () => {
       }
     } else {
       stop()
-      restore()
       state.log.unshift({ id: Date.now().toString(), name: '自动操作结束', color: 'green', time: `${getTime()}` })
     }
   } else {
@@ -123,6 +121,13 @@ const run = async () => {
         } else {
           state.loopWaittingTime = 0
         }
+        if (state.elf.loop) {
+          if (state.loopWaittingTime) {
+            localStorage.setItem('clock', `<h1 style="color: red">${Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000)}</h1>`)
+          } else {
+            localStorage.setItem('clock', ``)
+          }
+        }
       })
       if (state.elf.loop) {
         if (state.elf.iife) {
@@ -134,13 +139,18 @@ const run = async () => {
           }, state.elf.interval * 1000)
         }
         if (state.elf.clock) {
-        IPC.invoke('EVAL', `window.hide()`)
-
+          IPC.invoke(
+            'EVAL',
+            `try{ process._c.close(); process._c.destory() }catch(_){};
+            process._c = new BrowserWindow({ frame: false, x: 100, y: 100, width: 100, height: 100, transparent: true, alwaysOnTop: true, skipTaskbar: true });
+            process._c.loadURL('${location.origin}/clock.html');
+            process._c.setIgnoreMouseEvents(true)
+            `,
+          )
         }
       } else {
         task()
       }
-
       if (state.elf.hide) {
         IPC.invoke('EVAL', `window.hide()`)
       }
@@ -149,10 +159,13 @@ const run = async () => {
 }
 
 const stop = () => {
+  console.log(12312321)
+  restore()
   clearInterval(timer)
   state.running = false
   clearTimeout(state.timer)
   state.elf.hide && IPC.invoke('EVAL', `window.show()`)
+  IPC.invoke('EVAL', `try{ process._c.close(); process._c.destory() }catch(_){};`)
 }
 
 const formatDuration = (milliseconds) => {
@@ -166,17 +179,6 @@ const formatDuration = (milliseconds) => {
   const formattedSeconds = seconds.toString().padStart(2, '0')
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${milliseconds.toString().slice(-3)}`
-}
-
-const TEST = () => {
-  state.elf.hide && IPC.invoke('EVAL', `
-  try { process._clock && process._clock.destroy() } catch (_) {}
-  process._clock = new BrowserWindow({ frame: true, x: 100, y: 100, width: undefined, height: undefined, transpanent: true, alwaysOnTop: true, skipTaskbar: true });
-  process._clock.loadURL('https://superelf.netlify.app/clock.html')
-  process._clock.webContents.toggleDevTools()
-  process._clock.setIgnoreMouseEvents(true);
-  `)
-  localStorage.setItem('clock', 'sdfsdfsd')
 }
 </script>
 
@@ -210,7 +212,6 @@ const TEST = () => {
         </a-descriptions>
         <template #extra>
           <a-button v-if="!state.running" type="primary" @click="run">运行</a-button>
-          <a-button v-if="!state.running" type="primary" @click="TEST">TEST</a-button>
         </template>
       </a-page-header>
       <div style="display: flex">
