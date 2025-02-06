@@ -17,7 +17,7 @@
   </style>
   <script>
     setInterval(() => {
-        document.body.innerHTML = localStorage.getItem('clock')
+        document.body.innerHTML = localStorage.getItem('clock') || '?'
     }, 1000)
   </script>
 </head>
