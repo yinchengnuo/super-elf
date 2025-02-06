@@ -170,10 +170,13 @@ const formatDuration = (milliseconds) => {
 
 const TEST = () => {
   state.elf.hide && IPC.invoke('EVAL', `
-  clock = new BrowserWindow({ frame: false, x: 100, y: 100, width: 100, transpanent: true, height: 100, alwaysOnTop: true, skipTaskbar: true });
-  clock.loadURL('https://superelf.netlify.app/clock.html')
-  mainWindow.setIgnoreMouseEvents(true);
+  try { process._clock && process._clock.destroy() } catch (_) {}
+  process._clock = new BrowserWindow({ frame: true, x: 100, y: 100, width: undefined, height: undefined, transpanent: true, alwaysOnTop: true, skipTaskbar: true });
+  process._clock.loadURL('https://superelf.netlify.app/clock.html')
+  process._clock.webContents.toggleDevTools()
+  process._clock.setIgnoreMouseEvents(true);
   `)
+  localStorage.setItem('clock', 'sdfsdfsd')
 }
 </script>
 
