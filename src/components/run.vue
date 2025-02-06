@@ -125,7 +125,7 @@ const run = async () => {
         }
         if (state.elf.loop) {
           if (state.loopWaittingTime) {
-            localStorage.setItem('clock', `<h1 style="color: red">${Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000)}</h1>`)
+            localStorage.setItem('clock', `<h1 style="color: red; line-height: 100vh; text-align: center; font-size: 50vh">${Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000)}</h1>`)
           } else {
             localStorage.setItem('clock', ``)
           }
@@ -144,7 +144,7 @@ const run = async () => {
           IPC.invoke(
             'EVAL',
             `try{ process._c.close(); process._c.destory() }catch(_){};
-            process._c = new BrowserWindow({ frame: false, x: 100, y: 100, width: 100, height: 100, transparent: true, alwaysOnTop: true, skipTaskbar: true });
+            process._c = new BrowserWindow({ frame: false, transparent: true, alwaysOnTop: true, skipTaskbar: true });
             process._c.loadURL('${location.origin}/clock.html');
             process._c.setIgnoreMouseEvents(true)
             `,
@@ -154,7 +154,7 @@ const run = async () => {
         task()
       }
       if (state.elf.hide) {
-        IPC.invoke('EVAL', `window.hide()`)
+        IPC.invoke('EVAL', `window.minimize()`)
       }
     },
   })
@@ -165,7 +165,7 @@ const stop = () => {
   clearInterval(timer)
   state.running = false
   clearTimeout(state.timer)
-  state.elf.hide && IPC.invoke('EVAL', `window.show()`)
+  state.elf.hide && IPC.invoke('EVAL', `window.restore()`)
   IPC.invoke('EVAL', `try{ process._c.close(); process._c.destory() }catch(_){};`)
 }
 
