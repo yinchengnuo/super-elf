@@ -17,6 +17,7 @@ const state = reactive({
   current: 0,
   running: false,
   loopWaitting: 0,
+  loopWaittingTime: 0,
   start: Date.now(),
   log: [],
 })
@@ -115,16 +116,34 @@ const run = async () => {
       state.running = true
       state.log.length = 0
       state.start = Date.now()
-      timer = setInterval(() => (state.time = Date.now() - state.start))
-      if(state.elf.iife) {
-        task()
-      } else {
-        state.loopWaitting = Date.now()
-        state.timer = setTimeout(() => {
+      timer = setInterval(() => {
+        state.time = Date.now() - state.start
+        if (state.loopWaitting) {
+          state.loopWaittingTime = Date.now() - state.loopWaitting
+        } else {
+          state.loopWaittingTime = 0
+        }
+      })
+      if (state.elf.loop) {
+        if (state.elf.iife) {
           task()
-        }, state.elf.delay * 1000)
+        } else {
+          state.loopWaitting = Date.now()
+          state.timer = setTimeout(() => {
+            task()
+          }, state.elf.interval * 1000)
+        }
+        if (state.elf.clock) {
+        IPC.invoke('EVAL', `window.hide()`)
+
+        }
+      } else {
+        task()
       }
-      state.elf.hide && IPC.invoke('EVAL', `window.hide()`)
+
+      if (state.elf.hide) {
+        IPC.invoke('EVAL', `window.hide()`)
+      }
     },
   })
 }
@@ -156,6 +175,7 @@ const formatDuration = (milliseconds) => {
       <a-page-header :title="state.elf.name" :sub-title="state.elf.desc">
         <template #tags>
           <a-tag :color="state.running ? 'error' : 'processing'">{{ state.running ? '运行中' : '未运行' }}</a-tag>
+          <a-tag v-if="state.running && state.elf.loop" color="error">{{ state.loopWaitting ? '循环操作等待中：预计还需等待 ' + Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000) + ' 秒' : '循环操作执行中' }}</a-tag>
         </template>
         <a-descriptions size="small" :column="3">
           <a-descriptions-item label="运行时隐藏本应用">
@@ -171,10 +191,10 @@ const formatDuration = (milliseconds) => {
             <a-tag>{{ state.elf.loop ? state.elf.count + '次' : '不循环' }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="运行后立即执行">
-            <a-tag>{{ state.elf.loop ? state.elf.iife ? '是' : '否' : '不循环' }}</a-tag>
+            <a-tag>{{ state.elf.loop ? (state.elf.iife ? '是' : '否') : '不循环' }}</a-tag>
           </a-descriptions-item>
           <a-descriptions-item label="循环间隔倒计时">
-            <a-tag>{{ state.elf.loop ? state.elf.clock ? '是' : '否' : '不循环' }}</a-tag>
+            <a-tag>{{ state.elf.loop ? (state.elf.clock ? '是' : '否') : '不循环' }}</a-tag>
           </a-descriptions-item>
         </a-descriptions>
         <template #extra>
@@ -198,7 +218,7 @@ const formatDuration = (milliseconds) => {
         <a-divider type="vertical" style="height: calc(100vh - 252px)" />
         <a-card title="运行日志" size="small" style="flex: 1" :bodyStyle="{ height: 'calc(100vh - 286px)', padding: '16px', overflow: 'auto' }">
           <template #extra>
-            <a-button v-if="state.time" type="link">已运行 {{ formatDuration(state.time) }}</a-button>
+            <a-button v-if="state.time" type="link">已运行 {{ formatDuration(state.time).split('.')[0] }}</a-button>
           </template>
           <a-timeline v-if="state.log.length">
             <a-timeline-item v-for="item in state.log" :key="item.id" :color="item.color">
