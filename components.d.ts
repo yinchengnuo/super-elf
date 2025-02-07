@@ -44,6 +44,7 @@ declare module 'vue' {
     ATimeline: typeof import('ant-design-vue/es')['Timeline']
     ATimelineItem: typeof import('ant-design-vue/es')['TimelineItem']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
+    Code: typeof import('./src/components/Code.vue')['default']
     Example: typeof import('./src/components/run.vue')['default']
     JavaScript: typeof import('./src/components/JavaScript.vue')['default']
     List: typeof import('./src/components/list.vue')['default']

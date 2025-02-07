@@ -1,5 +1,6 @@
 <script setup>
 import Actions from '@/utils/actions'
+import Code from '@/components/Code.vue'
 import { getPosition, runAction } from '@/utils'
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
@@ -258,8 +259,9 @@ onMounted(() => {
                     <template #addonAfter>秒</template>
                   </a-input-number>
                 </a-form-item>
-                <a-form-item label="执行代码" required v-if="item.subType === 'JavaScript'">
-                  <a-input v-model:value="item.code" placeholder="请输入代码" @focus="({ target }) => target.select()" style="width: calc(100vw - 521px)" />
+                <a-form-item label="" required v-if="item.subType === 'JavaScript'">
+                  <!-- <a-input v-model:value="item.code" placeholder="请输入代码" @focus="({ target }) => target.select()" style="width: calc(100vw - 521px)" /> -->
+                    <Code v-model:code="item.code" />
                 </a-form-item>
               </a-space>
             </template>

@@ -31,7 +31,7 @@ if (location.href.includes('netlify')) {
 }
 
 window.alert = (message) => {
-  require('electron').ipcRenderer.invoke('EVAL', `import('electron').then(({ dialog }) => dialog.showMessageBoxSync(window, { title: '超级精灵', message: ${message} }))`)
+  require('electron').ipcRenderer.invoke('EVAL', `import('electron').then(({ dialog }) => dialog.showMessageBoxSync(window, { title: '超级精灵', message: '${message}' }))`)
 }
 </script>
 
