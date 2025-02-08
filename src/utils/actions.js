@@ -15,6 +15,6 @@ export default {
     },
     { type: '释放', action: [{ type: '鼠标左键' }, { type: '鼠标右键' }, { type: '鼠标滚轮' }] },
   ],
-  键盘操作: [{ type: '输入' }, { type: '敲击', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '按下并按住', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '释放', action: Object.keys(KEYS).map((type) => ({ type })) }],
+  键盘操作: [{ type: '输入文本' }, { type: '输入变量' }, { type: '敲击', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '按下并按住', action: Object.keys(KEYS).map((type) => ({ type })) }, { type: '释放', action: Object.keys(KEYS).map((type) => ({ type })) }],
   逻辑操作: [{ type: '等待执行' }, { type: 'JavaScript' }],
 }

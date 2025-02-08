@@ -30,5 +30,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :id="id" style="width: calc(100vw - 432px); height: 60px"></div>
+  <div :id="id" style="width: calc(100vw - 432px); height: 99px"></div>
 </template>

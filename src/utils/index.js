@@ -79,13 +79,24 @@ export const runAction = async (item, list, count) =>
       }
     }
     if (item.type === '键盘操作') {
-      if (item.subType === '输入') {
+      if (item.subType === '输入文本') {
         IPC.once(code, () => resolve())
         IPC.invoke(
           'EVAL',
           `import('@nut-tree/nut-js').then(async ({ keyboard }) => {
               keyboard.config.autoDelayMs = 1
               await keyboard.type('${item.text}')
+              window.webContents.send('${code}')
+          })`,
+        ).catch(() => {})
+      }
+      if (item.subType === '输入变量') {
+        IPC.once(code, () => resolve())
+        IPC.invoke(
+          'EVAL',
+          `import('@nut-tree/nut-js').then(async ({ keyboard }) => {
+              keyboard.config.autoDelayMs = 1
+              await keyboard.type('${eval(item.text)}')
               window.webContents.send('${code}')
           })`,
         ).catch(() => {})

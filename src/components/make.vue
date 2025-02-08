@@ -47,13 +47,13 @@ const list = computed(() => {
         } else {
           item._type = 'error'
         }
-      } else if (item.type.includes('键盘') && item.subType === '输入') {
+      } else if (item.type.includes('键盘') && item.subType.startsWith('输入')) {
         if (item.text) {
           item._type = 'info'
         } else {
           item._type = 'error'
         }
-      } else if (item.type.includes('键盘') && item.subType !== '输入') {
+      } else if (item.type.includes('键盘') && !item.subType.startsWith('输入')) {
         if (item.keys.length) {
           item._type = 'info'
         } else {
@@ -233,10 +233,10 @@ onMounted(() => {
                     </a-select-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item label="文字" required v-if="item.subType === '输入'">
-                  <a-input v-model:value="item.text" placeholder="请输入文字" allowClear @focus="({ target }) => target.select()" style="width: 240px" />
+                <a-form-item label="文字" required v-if="item.subType?.startsWith('输入')">
+                  <a-input v-model:value="item.text" placeholder="请输入" allowClear @focus="({ target }) => target.select()" style="width: 240px" />
                 </a-form-item>
-                <a-form-item label="按键" required v-if="item.subType && item.subType !== '输入'">
+                <a-form-item label="按键" required v-if="item.subType && !item.subType?.startsWith('输入')">
                   <a-select v-model:value="item.keys" mode="multiple" showSearch style="width: 240px" placeholder="请选择按键">
                     <a-select-option v-for="item in item.action.find((e) => e.type === item.subType)?.action" :value="item.type">
                       {{ item.type }}
@@ -292,7 +292,7 @@ onMounted(() => {
         </a-alert>
       </div>
     </a-space>
-    <div style="position: sticky; bottom: 0; background: #fff; overflow: hidden">
+    <div style="position: sticky; bottom: 0; background: #fff; overflow: hidden; z-index: 9;">
       <a-divider v-if="!list.length" />
       <a-dropdown>
         <a-button block type="primary" style="margin: 8px 0">
