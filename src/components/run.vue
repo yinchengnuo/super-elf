@@ -64,7 +64,6 @@ const task = async () => {
     if (running === false) break
     state.current = state.elf.details.indexOf(item)
     nextTick(() => stepRefs.value[state.current].$el.scrollIntoView({ behavior: 'smooth', block: 'center' }))
-    state.log.unshift({ id: Date.now().toString(), name: '开始执行', item, color: 'green', time: `${getTime()}` })
     await runAction(item, state.elf.details, state.count + 1)
       .then(() => state.log.unshift({ id: Date.now().toString(), name: '执行成功', item, color: 'green', time: `${getTime()}` }))
       .catch((e) => {
@@ -237,8 +236,7 @@ const formatDuration = (milliseconds) => {
           <a-timeline v-if="state.log.length">
             <a-timeline-item v-for="item in state.log" :key="item.id" :color="item.color">
               <div>{{ item.time }}</div>
-              <a-tag v-if="item.name === '开始执行'" color="processing">{{ item.name }}</a-tag>
-              <a-tag v-else-if="item.name === '执行成功'" color="success">{{ item.name }}</a-tag>
+              <a-tag v-if="item.name === '执行成功'" color="success">{{ item.name }}</a-tag>
               <a-tag v-else-if="item.name === '开始失败'" color="error">{{ item.name }}</a-tag>
               <a-tag v-else>{{ item.name }}</a-tag>
               <Actions v-if="item.item" :item="item.item" text />
