@@ -16,17 +16,11 @@ const state = reactive({
 })
 try {
   if (PROPS.activeKey) {
-    state.list = JSON.parse(localStorage.getItem('detail') || '[]')
+    state.list = []
   } else {
     state.list = PROPS.list
   }
 } catch (_) {}
-
-watch(
-  () => state.list,
-  () => localStorage.setItem('detail', JSON.stringify(state.list)),
-  { deep: true },
-)
 
 const list = computed(() => {
   const list = state.list.map((item) => {
@@ -118,12 +112,7 @@ const runAll = async (list) => {
 }
 
 const save = () => {
-  if (PROPS.activeKey) {
-    EMITS('save', state.list)
-    sessionStorage.setItem('_detail', JSON.stringify(state.list))
-  } else {
-    EMITS('save', state.list)
-  }
+  EMITS('save', state.list)
 }
 
 onMounted(() => {

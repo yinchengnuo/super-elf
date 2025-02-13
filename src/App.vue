@@ -4,6 +4,7 @@ import API from '@/utils/api'
 import Store from '@/utils/store'
 import { RouterView } from 'vue-router'
 import { message } from 'ant-design-vue'
+import ActionsData from '@/utils/actions'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
 
 const fs = require('fs')
@@ -16,7 +17,16 @@ const IPC = require('electron').ipcRenderer
 IPC.once(code, (_, id) => {
   window.id = id
 
-  API('/login').then((data) => Object.assign(Store, data))
+  API('/login').then((data) => {
+    Object.assign(Store, data)
+    Store.list = Store.list.map((e) => ({
+      ...e,
+      details: e.details.map((e) => ({
+        ...e,
+        action: ActionsData[e.type],
+      })),
+    }))
+  })
 })
 IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId({ original: true })))`).catch(() => {})
 

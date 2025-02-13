@@ -60,27 +60,6 @@ const run = (item) => {
 
 <template>
   <div style="height: calc(100vh - 120px); overflow: auto">
-    <a-space direction="vertical" style="width: 100%">
-      <a-alert v-for="item in list" :key="item.name" :type="item.type">
-        <template #message>
-          <div>{{ item.name }}</div>
-        </template>
-        <template #description>
-          <code>{{ item.code }}</code>
-        </template>
-        <template #action>
-          <a-space direction="vertical">
-            <a-space>
-              <a-button size="small" type="link" @click="copy(item)">复制</a-button>
-              <a-button size="small" type="link" danger @click="run(item)">执行</a-button>
-            </a-space>
-            <a-space>
-              <a-tag v-if="item.win" color="processing">Win</a-tag>
-              <a-tag v-if="item.mac" color="success">Mac</a-tag>
-            </a-space>
-          </a-space>
-        </template>
-      </a-alert>
-    </a-space>
+    123
   </div>
 </template>

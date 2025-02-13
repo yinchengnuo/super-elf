@@ -9,7 +9,7 @@ export default (url, data = {}, headers = {}) =>
         Name: process.env.USER || process.env.USERNAME,
         Platform: process.platform,
         Machine: window.id,
-        _id: Store._id || '',
+        uuid: Store._id || '',
         id: Store.id || '',
         ...headers,
       },

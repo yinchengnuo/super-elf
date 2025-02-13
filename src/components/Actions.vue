@@ -23,7 +23,7 @@ defineProps(['item', 'text'])
       </template>
     </template>
     <template v-if="item.type.includes('键盘')">
-      <template v-if="item.subType.startsWith('输入')">
+      <template v-if="item.subType?.startsWith('输入')">
         <a-tag :color="getGentleHexColor()">输入</a-tag>
         <a-tag :color="getGentleHexColor()">{{ item.text }}</a-tag>
       </template>
@@ -54,7 +54,7 @@ defineProps(['item', 'text'])
       <template v-else> {{ item.subTypeKey }} {{ item.subType }} </template>
     </template>
     <template v-if="item.type.includes('键盘')">
-      <template v-if="item.subType.startsWith('输入')"> 输入 {{ item.text }} </template>
+      <template v-if="item.subType?.startsWith('输入')"> 输入 {{ item.text }} </template>
       <template v-else> {{ item.subType }} {{ item.keys.join('+') }} </template>
     </template>
     <template v-if="item.type.includes('逻辑')">

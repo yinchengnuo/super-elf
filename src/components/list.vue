@@ -1,7 +1,9 @@
 <script setup>
 import Make from './make.vue'
+import API from '@/utils/api'
 import Store from '@/utils/store'
 import Actions from './Actions.vue'
+import ActionsData from '@/utils/actions'
 import { message, Modal } from 'ant-design-vue'
 import { ref, onMounted, reactive, watch } from 'vue'
 import { runAction, getGentleHexColor } from '@/utils'
@@ -29,7 +31,20 @@ const state = reactive({
 })
 
 const getList = () => {
-
+  API('/list/get').then((data) => {
+    Store.list = data.map((e) => ({
+      ...e,
+      details: e.details.map((e) => ({
+        ...e,
+        action: ActionsData[e.type],
+      })),
+    }))
+    if (state.search.name) {
+      state.list = data.filter((item) => item.name.includes(state.search.name))
+    } else {
+      state.list = Store.list
+    }
+  })
 }
 
 const add = () => {
@@ -54,7 +69,10 @@ const del = (record) => {
         state.list.findIndex((item) => item.id === record.id),
         1,
       )
-      localStorage.setItem('list', JSON.stringify(state.list))
+      API('/list/del', { _id: record._id }).then(() => {
+        message.success('删除成功')
+        getList()
+      })
     },
   })
 }
@@ -62,13 +80,18 @@ const del = (record) => {
 const save = () => {
   refForm.value.validate().then(() => {
     if (state.drawer.data.details.length) {
-      if (state.drawer.data.id) {
-        state.list[state.list.findIndex((item) => item.id === state.drawer.data.id)] = state.drawer.data
-      } else {
-        state.list.unshift({ ...state.drawer.data, id: Date.now().toString() })
-      }
-      localStorage.setItem('list', JSON.stringify(state.list))
       state.drawer.open = false
+      if (state.drawer.data._id) {
+        API('/list/edit', { ...state.drawer.data, details: state.drawer.data.details.map((e) => ({ ...e, action: undefined })) }).then(() => {
+          message.success('编辑成功')
+          getList()
+        })
+      } else {
+        API('/list/add', { ...state.drawer.data, details: state.drawer.data.details.map((e) => ({ ...e, action: undefined })) }).then(() => {
+          message.success('新增成功')
+          getList()
+        })
+      }
     } else {
       message.warn('没有操作信息')
     }
@@ -212,12 +235,12 @@ onMounted(() => {
     <div style="display: flex; justify-content: space-between">
       <a-form layout="inline" :model="state.search">
         <a-form-item label="名称">
-          <a-input v-model:value="state.search.nae" placeholder="请输入名称搜索" allowClear />
+          <a-input v-model:value.trim="state.search.name" placeholder="请输入名称搜索" allowClear />
         </a-form-item>
       </a-form>
       <a-space>
-        <a-button type="primary">搜索</a-button>
-        <a-button @click="state.search.name = ''">重置</a-button>
+        <a-button type="primary" @click="getList()">搜索</a-button>
+        <a-button @click="((state.search.name = ''), (state.list = Store.list))">重置</a-button>
       </a-space>
     </div>
     <a-card title="超级精灵管理" style="width: 100%; margin-top: 8px" :body-style="{ padding: 0 }">
