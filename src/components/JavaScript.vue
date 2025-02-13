@@ -6,8 +6,29 @@ const list = [
     mac: true,
     win: true,
     type: 'info',
+    name: '文本阅读',
+    code: "speechSynthesis.speak(new SpeechSynthesisUtterance('欢迎使用超级精灵'))",
+  },
+  {
+    mac: false,
+    win: true,
+    type: 'info',
+    name: '应用最小化恢复',
+    code: "require('child_process').execSync(`${require('path').join(process.resourcesPath,'/nircmd.exe')} win activate title 超级精灵`);",
+  },
+  {
+    mac: true,
+    win: true,
+    type: 'info',
     name: '本应用最小化',
     code: `require('electron').ipcRenderer.invoke('EVAL', 'window.minimize()')`,
+  },
+  {
+    mac: true,
+    win: true,
+    type: 'info',
+    name: '本应用关闭',
+    code: `require('electron').ipcRenderer.invoke('EVAL', 'app.quit()')`,
   },
   {
     mac: false,
@@ -28,15 +49,15 @@ const list = [
     win: true,
     type: 'error',
     name: '电脑关机',
-    code: 'require("child_process").exec("shutdown /s /t 0")'
+    code: 'require("child_process").exec("shutdown /s /t 0")',
   },
   {
     mac: false,
     win: true,
     type: 'error',
     name: '电脑重启',
-    code: 'require("child_process").exec("shutdown /r /t 0 /f")'
-  }
+    code: 'require("child_process").exec("shutdown /r /t 0 /f")',
+  },
 ]
 
 const copy = (item) => {
@@ -45,9 +66,13 @@ const copy = (item) => {
 }
 
 const run = (item) => {
-  eval(`(async () => {
-    ${item.code}
-  })()`)
+  if ((process.platform === 'win32' && item.win) || (process.platform === 'darwin' && item.mac)) {
+    eval(`(async () => {
+      ${item.code}
+      })()`)
+  } else {
+    message.error('当前系统不支持此操作')
+  }
 }
 </script>
 

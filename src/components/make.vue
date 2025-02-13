@@ -233,7 +233,7 @@ onMounted(() => {
                     </a-select-option>
                   </a-select>
                 </a-form-item>
-                <a-form-item label="文字" required v-if="item.subType?.startsWith('输入')">
+                <a-form-item :label="item.subType === '输入文本' ? '文字' : '变量'" required v-if="item.subType?.startsWith('输入')">
                   <a-input v-model:value="item.text" placeholder="请输入" allowClear @focus="({ target }) => target.select()" style="width: 240px" />
                 </a-form-item>
                 <a-form-item label="按键" required v-if="item.subType && !item.subType?.startsWith('输入')">
@@ -261,7 +261,7 @@ onMounted(() => {
                 </a-form-item>
                 <a-form-item label="" required v-if="item.subType === 'JavaScript'">
                   <!-- <a-input v-model:value="item.code" placeholder="请输入代码" @focus="({ target }) => target.select()" style="width: calc(100vw - 521px)" /> -->
-                    <Code v-model:code="item.code" />
+                  <Code v-model:code="item.code" />
                 </a-form-item>
               </a-space>
             </template>
@@ -292,7 +292,7 @@ onMounted(() => {
         </a-alert>
       </div>
     </a-space>
-    <div style="position: sticky; bottom: 0; background: #fff; overflow: hidden; z-index: 9;">
+    <div style="position: sticky; bottom: 0; background: #fff; overflow: hidden; z-index: 9">
       <a-divider v-if="!list.length" />
       <a-dropdown>
         <a-button block type="primary" style="margin: 8px 0">

@@ -1,6 +1,7 @@
 <script setup>
 import axios from 'axios'
-import api from '@/utils/api'
+import API from '@/utils/api'
+import Store from '@/utils/store'
 import { RouterView } from 'vue-router'
 import { message } from 'ant-design-vue'
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
@@ -15,11 +16,9 @@ const IPC = require('electron').ipcRenderer
 IPC.once(code, (_, id) => {
   window.id = id
 
-  api('/login').then((res) => {
-    console.log(res)
-  })
+  API('/login').then((data) => Object.assign(Store, data))
 })
-IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId()))`).catch(() => {})
+IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId({ original: true })))`).catch(() => {})
 
 if (location.href.includes('netlify')) {
   const nircmd = path.join(process.resourcesPath, 'nircmd.exe')

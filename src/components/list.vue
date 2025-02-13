@@ -1,5 +1,6 @@
 <script setup>
 import Make from './make.vue'
+import Store from '@/utils/store'
 import Actions from './Actions.vue'
 import { message, Modal } from 'ant-design-vue'
 import { ref, onMounted, reactive, watch } from 'vue'
@@ -14,7 +15,7 @@ const state = reactive({
   search: {
     name: '',
   },
-  list: [],
+  list: Store.list,
   drawer: {
     open: false,
     title: '新增',
@@ -28,9 +29,7 @@ const state = reactive({
 })
 
 const getList = () => {
-  try {
-    state.list = JSON.parse(localStorage.getItem('list') || '[]')
-  } catch (_) {}
+
 }
 
 const add = () => {
@@ -116,7 +115,6 @@ watch(
 )
 
 onMounted(() => {
-  getList()
   autoAdd()
 })
 </script>

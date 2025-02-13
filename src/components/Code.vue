@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const PROPS = defineProps({
   code: {
@@ -10,25 +10,31 @@ const PROPS = defineProps({
 
 const EMITS = defineEmits(['update:code'])
 
-function uuid() {
-  const tempUrl = URL.createObjectURL(new Blob())
-  const uuid = tempUrl.toString()
-  URL.revokeObjectURL(tempUrl)
-  return uuid.slice(-36)
-}
-const id = uuid()
+const code = ref(null)
 
 onMounted(() => {
   ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.9.6/')
-  ace.require("ace/ext/language_tools");
-  const editor = ace.edit(id)
+  ace.require('ace/ext/language_tools')
+  const editor = ace.edit(code.value)
   editor.setValue(PROPS.code)
   editor.clearSelection()
   editor.session.setMode('ace/mode/javascript')
-  editor.getSession().on('change', () => EMITS('update:code', editor.getValue()))
+  const setHeight = () => {
+    code.value.style.height = `${editor.getSession().getLength() * 16}px`
+    editor.resize();
+  }
+  setHeight()
+  editor.getSession().on('change', () => {
+    EMITS('update:code', editor.getValue())
+    setHeight()
+  })
+  editor.setOptions({
+    enableLiveAutocompletion: true,
+    enableBasicAutocompletion: true,
+  })
 })
 </script>
 
 <template>
-  <div :id="id" style="width: calc(100vw - 432px); height: 99px"></div>
+  <div ref="code" style="width: calc(100vw - 432px); height: 96px"></div>
 </template>
