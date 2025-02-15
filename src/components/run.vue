@@ -124,7 +124,7 @@ const run = async () => {
         }
         if (state.elf.loop) {
           if (state.loopWaittingTime) {
-            localStorage.setItem('clock', `<h1 style="color: red; line-height: 100vh; text-align: center; font-size: 50vh; opacity: 0.1">${Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000)}</h1>`)
+            localStorage.setItem('clock', `<h1 style="color: red; line-height: 100vh; text-align: center; font-size: 50vh; opacity: 0.382">${Math.ceil((state.elf.interval * 1000 - state.loopWaittingTime) / 1000)}</h1>`)
           } else {
             localStorage.setItem('clock', ``)
           }
