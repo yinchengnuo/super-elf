@@ -36,5 +36,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="code" style="width: calc(100vw - 432px); height: 96px"></div>
+  <div ref="code" style="width: calc(100vw - 579px); height: 96px;display: inline-block;"></div>
 </template>

@@ -249,8 +249,8 @@ onMounted(() => {
                   </a-input-number>
                 </a-form-item>
                 <a-form-item label="" required v-if="item.subType === 'JavaScript'">
-                  <!-- <a-input v-model:value="item.code" placeholder="请输入代码" @focus="({ target }) => target.select()" style="width: calc(100vw - 521px)" /> -->
                   <Code v-model:code="item.code" />
+                  <a-checkbox v-model:checked="item.hideCode">隐藏代码</a-checkbox>
                 </a-form-item>
               </a-space>
             </template>

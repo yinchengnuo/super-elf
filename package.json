@@ -41,6 +41,7 @@
     "files": [
       "index.js"
     ],
+    "asar": false,
     "appId": "com.yinchengnuo.superelf",
     "productName": "超级精灵",
     "artifactName": "${productName}.${ext}",

@@ -11,6 +11,7 @@ declare module 'vue' {
     AButton: typeof import('ant-design-vue/es')['Button']
     ACard: typeof import('ant-design-vue/es')['Card']
     ACardGrid: typeof import('ant-design-vue/es')['CardGrid']
+    ACheckbox: typeof import('ant-design-vue/es')['Checkbox']
     AConfigProvider: typeof import('ant-design-vue/es')['ConfigProvider']
     Actions: typeof import('./src/components/Actions.vue')['default']
     ADescriptions: typeof import('ant-design-vue/es')['Descriptions']
