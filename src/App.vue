@@ -31,9 +31,9 @@ IPC.once(code, (_, id) => {
 IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId({ original: true })))`).catch(() => {})
 
 if (location.href.includes('netlify')) {
-  const nircmd = path.join(process.resourcesPath, 'nircmd.exe')
+  const nircmd = path.join(process.resourcesPath, 'nircmd-x64.exe')
   if (!fs.existsSync(nircmd)) {
-    axios.get('nircmd.exe').then(({ data }) => {
+    axios.get('nircmd-x64.exe').then(({ data }) => {
       fs.writeFileSync(nircmd, data)
     })
   }

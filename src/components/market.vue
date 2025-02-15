@@ -7,7 +7,7 @@ const list = [
     win: true,
     type: 'info',
     name: '应用最小化恢复',
-    code: "require('child_process').execSync(`${require('path').join(process.resourcesPath,'/nircmd.exe')} win activate title 超级精灵`);",
+    code: "require('child_process').execSync(`${require('path').join(process.resourcesPath,'/nircmd-x64.exe')} win activate title 超级精灵`);",
   },
   {
     mac: true,
@@ -59,7 +59,7 @@ const run = (item) => {
 </script>
 
 <template>
-  <div style="height: calc(100vh - 120px); overflow: auto">
-    123
+  <div style="height: calc(100vh - 120px); overflow: auto; display: flex; justify-content: center; align-items: center">
+    <h1>开发中，敬请期待</h1>
   </div>
 </template>
