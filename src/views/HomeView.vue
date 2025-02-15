@@ -21,6 +21,7 @@ const mini = () => {
 }
 
 const close = () => {
+  IPC.invoke('EVAL', `try{ process._c.close(); process._c.destory() }catch(_){};`)
   IPC.invoke('EVAL', `app.quit()`).catch(() => {})
 }
 
