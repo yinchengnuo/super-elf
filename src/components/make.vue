@@ -250,7 +250,7 @@ onMounted(() => {
                 </a-form-item>
                 <a-form-item label="" required v-if="item.subType === 'JavaScript'">
                   <Code v-model:code="item.code" />
-                  <a-checkbox v-model:checked="item.hideCode">隐藏代码</a-checkbox>
+                  <!-- <a-checkbox v-model:checked="item.hideCode">隐藏代码</a-checkbox> -->
                 </a-form-item>
               </a-space>
             </template>
