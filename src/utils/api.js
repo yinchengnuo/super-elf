@@ -1,3 +1,4 @@
+const os = require('os');
 import Store from '@/utils/store'
 
 export default (url, data = {}, headers = {}) =>
@@ -6,7 +7,7 @@ export default (url, data = {}, headers = {}) =>
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Name: process.env.USER || process.env.USERNAME,
+        Name: process.env.USER || process.env.USERNAME || os.userInfo().username,
         Platform: process.platform,
         Machine: window.id,
         uuid: Store._id || '',
