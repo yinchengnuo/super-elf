@@ -10,13 +10,6 @@ const list = [
     code: "speechSynthesis.speak(new SpeechSynthesisUtterance('欢迎使用超级精灵'))",
   },
   {
-    mac: false,
-    win: true,
-    type: 'info',
-    name: '应用最小化恢复',
-    code: "require('child_process').execSync(`${require('path').join(process.resourcesPath,'/nircmd-x64.exe')} win activate title 超级精灵`);",
-  },
-  {
     mac: true,
     win: true,
     type: 'info',

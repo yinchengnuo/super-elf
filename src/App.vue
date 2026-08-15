@@ -30,15 +30,6 @@ IPC.once(code, (_, id) => {
 })
 IPC.invoke('EVAL', `import('node-machine-id').then(async (lib) => window.webContents.send('${code}', await lib.default.machineId({ original: true })))`).catch(() => {})
 
-if (location.href.includes('netlify')) {
-  const nircmd = path.join(process.resourcesPath, 'nircmd-x64.exe')
-  if (!fs.existsSync(nircmd)) {
-    axios.get('nircmd-x64.exe').then(({ data }) => {
-      fs.writeFileSync(nircmd, data)
-    })
-  }
-}
-
 window.alert = (message) => {
   require('electron').ipcRenderer.invoke('EVAL', `import('electron').then(({ dialog }) => dialog.showMessageBoxSync(window, { title: '超级精灵', message: '${message}' }))`)
 }
