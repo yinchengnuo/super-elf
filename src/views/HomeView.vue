@@ -5,7 +5,7 @@ import logo from '@/assets/logo.png'
 import run from '@/components/run.vue'
 import make from '@/components/make.vue'
 import list from '@/components/list.vue'
-import market from '@/components/market.vue'
+// import market from '@/components/market.vue'
 import JavaScript from '@/components/JavaScript.vue'
 
 import { MinusOutlined, CloseOutlined } from '@ant-design/icons-vue'
@@ -69,9 +69,9 @@ IPC.invoke('EVAL', `window.maximize()`).catch(() => {})
       <a-tab-pane :key="3" tab="超级精灵管理">
         <list :activeKey="state.activeKey" @run="state.activeKey = 1" />
       </a-tab-pane>
-      <a-tab-pane :key="4" tab="超级精灵市场">
+      <!-- <a-tab-pane :key="4" tab="超级精灵市场">
         <market :activeKey="state.activeKey" @buy="state.activeKey = 1" @run="state.activeKey = 1" />
-      </a-tab-pane>
+      </a-tab-pane> -->
       <a-tab-pane :key="5" tab="常用JavaScript脚本">
         <JavaScript :activeKey="state.activeKey" />
       </a-tab-pane>
